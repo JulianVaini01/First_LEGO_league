@@ -80,7 +80,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
     <div className="min-h-screen bg-gray-900 relative">
       {/* Background Image */}
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-45 z-0"
         style={{
           backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
         }}

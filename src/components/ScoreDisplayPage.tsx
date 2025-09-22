@@ -18,7 +18,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
     <div className="min-h-screen bg-gray-900 relative">
       {/* Background Image */}
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-10 z-0"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-50 z-0"
         style={{
           backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
         }}

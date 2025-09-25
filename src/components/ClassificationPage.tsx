@@ -78,27 +78,9 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
 
   return (
     <div className="min-h-screen bg-gray-900 relative">
-      {/* Background Video */}
-      <video 
-        className="fixed inset-0 w-full h-full object-cover opacity-45 z-0"
-        autoPlay 
-        loop 
-        muted 
-        playsInline
-      >
-        <source src="/first-lego-video.mp4" type="video/mp4" />
-        {/* Fallback to image if video fails */}
-        <div 
-          className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-45 z-0"
-          style={{
-            backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
-          }}
-        />
-      </video>
-      
-      {/* Backup Background Image (if video doesn't load) */}
+      {/* Background Image */}
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-45 z-0 hidden"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0"
         style={{
           backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
         }}

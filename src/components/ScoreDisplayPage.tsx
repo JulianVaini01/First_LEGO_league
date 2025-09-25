@@ -17,12 +17,32 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
   return (
     <div className="min-h-screen bg-gray-900 relative">
       {/* Background Image */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0"
-        style={{
-          backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover opacity-50 z-0"
+        onError={(e) => {
+          // Fallback to image if video fails to load
+          const target = e.target as HTMLVideoElement;
+          target.style.display = 'none';
+          const fallback = document.createElement('div');
+          fallback.className = 'fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0';
+          fallback.style.backgroundImage = 'url(/FIRST_AGE-powerpoint-template2.jpg)';
+          target.parentNode?.appendChild(fallback);
         }}
-      />
+      >
+        <source src="/first-lego-video.mp4" type="video/mp4" />
+        {/* Fallback image if video not supported */}
+        <div 
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0"
+          style={{
+            backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
+          }}
+        />
+      </video>
       
       {/* Header */}
       <div className="bg-black/50 backdrop-blur-md border-b border-white/10">

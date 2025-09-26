@@ -221,12 +221,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
           {/* Logos in top right */}
           <div className="flex items-center space-x-4">
             <img 
-              src="/Imagen2.png" 
+              src="./Imagen2.png" 
               alt="First Lego League" 
               className="h-10 w-auto"
             />
             <img 
-              src="/Imagen1.jpg" 
+              src="./Imagen1.jpg" 
               alt="UNNO" 
               className="h-10 w-auto bg-white rounded-lg px-2 py-1"
             />

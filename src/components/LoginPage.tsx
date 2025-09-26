@@ -35,12 +35,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       {/* Logos in top right */}
       <div className="absolute top-6 right-6 flex items-center space-x-4 z-10">
         <img 
-          src="/Imagen2.png" 
+          src="./Imagen2.png" 
           alt="First Lego League" 
           className="h-12 w-auto"
         />
         <img 
-          src="/Imagen1.jpg" 
+          src="./Imagen1.jpg" 
           alt="UNNO" 
           className="h-12 w-auto bg-white rounded-lg px-2 py-1"
         />

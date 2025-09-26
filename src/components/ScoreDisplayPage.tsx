@@ -31,7 +31,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
           const fallback = document.createElement('div');
           fallback.className = 'fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0';
           fallback.style.backgroundImage = 'url(/FIRST_AGE-powerpoint-template2.jpg)';
-          target.parentNode?.appendChild(fallback);
+          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
         }}
       >
         <source src="/first-lego-video.mp4" type="video/mp4" />
@@ -39,7 +39,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
         <div 
           className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0"
           style={{
-            backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
+            backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
           }}
         />
       </video>
@@ -60,12 +60,12 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
             {/* Logos in top right */}
             <div className="flex items-center space-x-4">
               <img 
-                src="/Imagen2.png" 
+                src="./Imagen2.png" 
                 alt="First Lego League" 
                 className="h-10 w-auto"
               />
               <img 
-                src="/Imagen1.jpg" 
+                src="./Imagen1.jpg" 
                 alt="UNNO" 
                 className="h-10 w-auto bg-white rounded-lg px-2 py-1"
               />

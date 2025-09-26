@@ -30,11 +30,11 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
           target.style.display = 'none';
           const fallback = document.createElement('div');
           fallback.className = 'fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0';
-          fallback.style.backgroundImage = 'url(/FIRST_AGE-powerpoint-template2.jpg)';
-          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
+          fallback.style.backgroundImage = 'url(./FIRST_AGE-powerpoint-template2.jpg)';
+          target.parentNode?.appendChild(fallback);
         }}
       >
-        <source src="/first-lego-video.mp4" type="video/mp4" />
+        <source src="./first-lego-video.mp4" type="video/mp4" />
         {/* Fallback image if video not supported */}
         <div 
           className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-60 z-0"

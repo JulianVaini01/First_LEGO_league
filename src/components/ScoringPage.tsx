@@ -203,7 +203,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-25 z-0"
         style={{
-          backgroundImage: 'url(/FIRST_AGE-powerpoint-template2.jpg)'
+          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
         }}
       />
       

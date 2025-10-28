@@ -325,6 +325,23 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         <div className="grid gap-6 mb-8">
           {missions.map((mission) => (
             <div key={mission.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="md:flex">
+                {/* Mission Image */}
+                <div className="md:w-1/3 bg-gray-50 flex items-center justify-center p-4">
+                  <img 
+                    src={`./missions/${mission.id.replace('m', 'mission-')}.png`}
+                    alt={`Imagen de ${mission.name}`}
+                    className="max-w-full h-auto rounded-lg shadow-md"
+                    onError={(e) => {
+                      // Fallback if image doesn't exist
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
+                
+                {/* Mission Content */}
+                <div className="md:w-2/3">
               <div className={`p-4 ${mission.hasNoEquipment ? 'bg-orange-100 border-l-4 border-orange-400' : 'bg-gray-50'}`}>
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -380,6 +397,8 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                       Bonus: {mission.bonus.description} (+{mission.bonus.points})
                     </button>
                   )}
+                </div>
+              </div>
                 </div>
               </div>
             </div>

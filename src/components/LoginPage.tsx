@@ -33,16 +33,16 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 flex items-center justify-center p-6">
       {/* Logos in top right */}
-      <div className="absolute top-6 right-6 flex items-center space-x-4 z-10">
+      <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center space-x-2 md:space-x-4 z-10">
         <img 
           src="./Imagen2.png" 
           alt="First Lego League" 
-          className="h-12 w-auto"
+          className="h-8 w-auto md:h-12"
         />
         <img 
           src="./Imagen1.jpg" 
           alt="UNNO" 
-          className="h-12 w-auto bg-white rounded-lg px-2 py-1"
+          className="h-8 w-auto md:h-12 bg-white rounded-lg px-1 py-0.5 md:px-2 md:py-1"
         />
       </div>
       

@@ -219,17 +219,30 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
             <h1 className="text-2xl font-bold">Hoja de Puntajes</h1>
           </div>
           {/* Logos in top right */}
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
             <img 
               src="./Imagen2.png" 
               alt="First Lego League" 
-              className="h-10 w-auto"
+              className="h-8 w-auto md:h-10"
             />
             <img 
               src="./Imagen1.jpg" 
               alt="UNNO" 
-              className="h-10 w-auto bg-white rounded-lg px-2 py-1"
+              className="h-8 w-auto md:h-10 bg-white rounded-lg px-1 py-0.5 md:px-2 md:py-1"
             />
+            {/* Mobile logos */}
+            <div className="md:hidden absolute top-4 right-4 flex items-center space-x-2">
+              <img 
+                src="./Imagen2.png" 
+                alt="First Lego League" 
+                className="h-6 w-auto"
+              />
+              <img 
+                src="./Imagen1.jpg" 
+                alt="UNNO" 
+                className="h-6 w-auto bg-white rounded px-1 py-0.5"
+              />
+            </div>
             <button
               onClick={handleSave}
               className="bg-green-500 hover:bg-green-600 px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"

@@ -13,7 +13,7 @@ const missions = [
     name: 'Cepillado de Superficie',
     description: 'Cepillo tocando la lona',
     points: 10,
-    maxCount: 2,
+    maxCount: 3,
     hasNoEquipment: true
   },
   {
@@ -21,7 +21,7 @@ const missions = [
     name: 'Revelación del Mapa',
     description: 'Secciones de capa superior completamente despejadas',
     points: 10,
-    maxCount: 6
+    maxCount: 3
   },
   {
     id: 'm03',
@@ -63,7 +63,7 @@ const missions = [
     name: 'Silo',
     description: 'Piezas preservadas fuera del silo',
     points: 10,
-    maxCount: 4
+    maxCount: 3
   },
   {
     id: 'm09',

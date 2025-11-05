@@ -127,6 +127,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [code, setCode] = useState('');
   const [missionScores, setMissionScores] = useState<Record<string, { completed: boolean; bonus: boolean; count: number }>>({});
   const [professionalism, setProfessionalism] = useState(20);
+  const [precisionTokens, setPrecisionTokens] = useState(6);
 
   const handleMissionToggle = (missionId: string, type: 'completed' | 'bonus' = 'completed') => {
     setMissionScores(prev => ({
@@ -172,6 +173,17 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     return total;
   };
 
+  const getPrecisionTokenPoints = (tokens: number) => {
+    switch (tokens) {
+      case 6: return 50;
+      case 5: return 50;
+      case 4: return 35;
+      case 3: return 25;
+      case 2: return 15;
+      case 1: return 10;
+      default: return 0;
+    }
+  };
   const handleSave = () => {
     if (!teamName.trim() || !code.trim()) {
       alert('Por favor completa el nombre del equipo y el código');
@@ -189,7 +201,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         acc[key] = missionScores[key].completed;
         return acc;
       }, {} as Record<string, boolean>),
-      precisionTokens: 0
+      precisionTokens: getPrecisionTokenPoints(precisionTokens)
     };
 
     onAddScore(score);
@@ -421,8 +433,50 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         </div>
 
         {/* Bottom Section */}
-        <div className="mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Precision Tokens */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <img src="./missions/image.png" alt="Precision Token" className="w-8 h-8 mr-3" />
+              Tokens de Precisión
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">Tokens Restantes:</label>
+                <select
+                  value={precisionTokens}
+                  onChange={(e) => setPrecisionTokens(Number(e.target.value))}
+                  className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value={6}>6 Tokens</option>
+                  <option value={5}>5 Tokens</option>
+                  <option value={4}>4 Tokens</option>
+                  <option value={3}>3 Tokens</option>
+                  <option value={2}>2 Tokens</option>
+                  <option value={1}>1 Token</option>
+                  <option value={0}>0 Tokens</option>
+                </select>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-3">
+                <div className="text-center">
+                  <span className="text-2xl font-bold text-blue-600">
+                    {getPrecisionTokenPoints(precisionTokens)}
+                  </span>
+                  <span className="text-gray-500 ml-1">pts</span>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 space-y-1">
+                <p>• 6-5 tokens: 50 puntos</p>
+                <p>• 4 tokens: 35 puntos</p>
+                <p>• 3 tokens: 25 puntos</p>
+                <p>• 2 tokens: 15 puntos</p>
+                <p>• 1 token: 10 puntos</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Professionalism */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Profesionalismo Cordial</h3>
             <div className="flex items-center space-x-4">
               <input
@@ -435,14 +489,32 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               />
               <span className="text-2xl font-bold text-blue-600 w-16 text-center">{professionalism}</span>
             </div>
+            <div className="mt-3 text-xs text-gray-500">
+              <p>Evalúa el comportamiento del equipo durante la competencia</p>
+            </div>
           </div>
         </div>
 
         {/* Total Score */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Puntuación Total</h2>
-          <div className="text-6xl font-bold mb-4">{calculateTotal()}</div>
-          <p className="text-blue-200">puntos + {professionalism} puntos de profesionalismo</p>
+          <div className="text-6xl font-bold mb-4">
+            {calculateTotal() + getPrecisionTokenPoints(precisionTokens) + professionalism}
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-sm text-blue-200 mt-4">
+            <div>
+              <p className="font-semibold">Misiones</p>
+              <p className="text-2xl">{calculateTotal()}</p>
+            </div>
+            <div>
+              <p className="font-semibold">Tokens</p>
+              <p className="text-2xl">{getPrecisionTokenPoints(precisionTokens)}</p>
+            </div>
+            <div>
+              <p className="font-semibold">Profesionalismo</p>
+              <p className="text-2xl">{professionalism}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

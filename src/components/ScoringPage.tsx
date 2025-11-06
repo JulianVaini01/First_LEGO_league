@@ -2,6 +2,26 @@ import React, { useState } from 'react';
 import { ArrowLeft, Save, AlertTriangle, Settings } from 'lucide-react';
 import { Score } from '../App';
 
+// 🌍 URL del Google Apps Script
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
+
+// Función para guardar en Google Sheets
+const guardarEnGoogleSheets = async (datos: any) => {
+  try {
+    await fetch(SHEET_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(datos),
+    });
+    console.log("✅ Datos enviados correctamente a Google Sheets");
+  } catch (error) {
+    console.error("❌ Error al enviar datos:", error);
+  }
+};
+
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
   onAddScore: (score: Omit<Score, 'id' | 'timestamp'>) => void;
@@ -190,12 +210,14 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       return;
     }
 
+    const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + professionalism;
+
     const score: Omit<Score, 'id' | 'timestamp'> = {
       code,
       table,
       team: teamName,
       round,
-      score: calculateTotal(),
+      score: totalScore,
       professionalism,
       missions: Object.keys(missionScores).reduce((acc, key) => {
         acc[key] = missionScores[key].completed;
@@ -204,6 +226,22 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       precisionTokens: getPrecisionTokenPoints(precisionTokens)
     };
 
+    // 👇 Guardar en Google Sheets
+    guardarEnGoogleSheets({
+      marca_temporal: new Date().toLocaleString('es-ES'),
+      codigo: code,
+      mesa: table,
+      equipo: teamName,
+      ronda: round,
+      puntuacion: totalScore,
+      profesionalismo: professionalism,
+      tokens_precision: getPrecisionTokenPoints(precisionTokens),
+      misiones_completadas: Object.keys(missionScores).filter(key => 
+        missionScores[key]?.completed || missionScores[key]?.count > 0
+      ).length
+    });
+
+    // Mantener la funcionalidad original
     onAddScore(score);
     alert('Puntuación guardada exitosamente');
     onNavigate('display');

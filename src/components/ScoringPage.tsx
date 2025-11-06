@@ -3,7 +3,7 @@ import { ArrowLeft, Save, AlertTriangle, Settings } from 'lucide-react';
 import { Score } from '../App';
 
 // 🌍 URL del Google Apps Script
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxTlridBBMEo40jm5025t-3sN0Pg3WC23h5jtd7Ti_FY8xIIxLsVgCBu7ngkqXH4Y9gaQ/exec";
 
 // Función para guardar en Google Sheets
 const guardarEnGoogleSheets = async (datos: any) => {

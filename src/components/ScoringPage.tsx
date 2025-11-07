@@ -2,26 +2,6 @@ import React, { useState } from 'react';
 import { ArrowLeft, Save, AlertTriangle, Settings } from 'lucide-react';
 import { Score } from '../App';
 
-// 🌍 URL del Google Apps Script
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxTlridBBMEo40jm5025t-3sN0Pg3WC23h5jtd7Ti_FY8xIIxLsVgCBu7ngkqXH4Y9gaQ/exec";
-
-// Función para guardar en Google Sheets
-const guardarEnGoogleSheets = async (datos: any) => {
-  try {
-    await fetch(SHEET_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(datos),
-    });
-    console.log("✅ Datos enviados correctamente a Google Sheets");
-  } catch (error) {
-    console.error("❌ Error al enviar datos:", error);
-  }
-};
-
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
   onAddScore: (score: Omit<Score, 'id' | 'timestamp'>) => void;
@@ -212,6 +192,37 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
 
     const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + professionalism;
 
+    // 🚀 Enviar los datos a Google Sheets
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxTlridBBMEo40jm5025t-3sN0Pg3WC23h5jtd7Ti_FY8xIIxLsVgCBu7ngkqXH4Y9gaQ/exec";
+
+    const data = {
+      codigo: code || "",
+      mesa: table || "",
+      equipo: teamName || "",
+      ronda: round || "",
+      puntuacion: totalScore || 0,
+      profesionalismo: professionalism || 0,
+    };
+
+    const sendToSheets = async () => {
+      try {
+        await fetch(SHEET_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        console.log("✅ Datos enviados a Google Sheets correctamente");
+      } catch (error) {
+        console.error("❌ Error al enviar datos:", error);
+      }
+    };
+
+    // Ejecutar el envío a Google Sheets
+    sendToSheets();
+
     const score: Omit<Score, 'id' | 'timestamp'> = {
       code,
       table,
@@ -225,21 +236,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       }, {} as Record<string, boolean>),
       precisionTokens: getPrecisionTokenPoints(precisionTokens)
     };
-
-    // 👇 Guardar en Google Sheets
-    guardarEnGoogleSheets({
-      marca_temporal: new Date().toLocaleString('es-ES'),
-      codigo: code,
-      mesa: table,
-      equipo: teamName,
-      ronda: round,
-      puntuacion: totalScore,
-      profesionalismo: professionalism,
-      tokens_precision: getPrecisionTokenPoints(precisionTokens),
-      misiones_completadas: Object.keys(missionScores).filter(key => 
-        missionScores[key]?.completed || missionScores[key]?.count > 0
-      ).length
-    });
 
     // Mantener la funcionalidad original
     onAddScore(score);

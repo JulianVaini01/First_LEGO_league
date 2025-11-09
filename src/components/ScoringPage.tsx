@@ -193,7 +193,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + professionalism;
 
     // 🚀 Enviar los datos a Google Sheets
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxTlridBBMEo40jm5025t-3sN0Pg3WC23h5jtd7Ti_FY8xIIxLsVgCBu7ngkqXH4Y9gaQ/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
 
     const data = {
       codigo: code || "",

@@ -203,6 +203,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       ronda: round || "",
       puntuacion: totalScore || 0,
       profesionalismo: professionalism || 0,
+      inspeccion_equipamiento: equipmentInspection ? 20 : 0,
     };
 
     const sendToSheets = async () => {

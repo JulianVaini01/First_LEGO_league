@@ -129,7 +129,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-blue-300 text-xs">
-            First Lego League - Temporada 2024-2025
+            First Lego League - Temporada 2025-2026
           </p>
         </div>
       </div>

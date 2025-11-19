@@ -128,6 +128,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [missionScores, setMissionScores] = useState<Record<string, { completed: boolean; bonus: boolean; count: number }>>({});
   const [professionalism, setProfessionalism] = useState(20);
   const [precisionTokens, setPrecisionTokens] = useState(6);
+  const [equipmentInspection, setEquipmentInspection] = useState(false);
 
   const handleMissionToggle = (missionId: string, type: 'completed' | 'bonus' = 'completed') => {
     setMissionScores(prev => ({
@@ -375,6 +376,16 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   Antes de participar se hará una inspección del equipamiento del robot 
                   para verificar que cumple con todas las especificaciones técnicas.
                 </p>
+                <button
+                  onClick={() => setEquipmentInspection(!equipmentInspection)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    equipmentInspection
+                      ? 'bg-green-500 text-white shadow-lg'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {equipmentInspection ? 'Completada (+20 pts)' : 'No Completada'}
+                </button>
               </div>
             </div>
           </div>
@@ -471,7 +482,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
           {/* Precision Tokens */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <img src="./missions/image.png" alt="Precision Token" className="w-8 h-8 mr-3" />
+              <img src="./image.png" alt="Precision Token" className="w-8 h-8 mr-3" />
               Tokens de Precisión
             </h3>
             <div className="space-y-3">

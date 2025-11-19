@@ -41,7 +41,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         {/* Competition Description */}
         <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 mb-12 border border-white/20">
           <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">
-            Submerged - Temporada 2024-2025
+            UNEARTHED - Temporada 2025-2026
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div>

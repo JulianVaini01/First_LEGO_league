@@ -16,7 +16,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <img 
               src="./Imagen2.png" 
               alt="First Lego League" 
-              className="h-8 w-auto md:h-20"
+              className="h-8 w-auto md:h-12"
             />
             <img 
               src="./Imagen1.png" 

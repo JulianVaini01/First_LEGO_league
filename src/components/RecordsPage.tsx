@@ -54,7 +54,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
               <img 
                 src="./Imagen1.jpg" 
                 alt="UNNO" 
-                className="h-6 w-auto bg-white rounded px-1 py-0.5"
+                className="h-6 w-auto rounded px-1 py-0.5"
               />
             </div>
             <div className="text-right">

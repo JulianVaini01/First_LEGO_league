@@ -7,7 +7,7 @@ interface HomePageProps {
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-red-800 to-indigo-1000 text-white">
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
         <div className="text-center mb-16">
@@ -33,7 +33,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               UNEARTHED - Temporada 2025-2026
             </h1>
           </div>
-          <p className="text-xl text-blue-200 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-whithe-200 max-w-3xl mx-auto leading-relaxed">
             Sistema de Evaluación para Réferis
           </p>
         </div>
@@ -46,25 +46,25 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-red-300 to-blue-300 bg-clip-text text-transparent">Acerca de la Competencia</h3>
-              <p className="text-blue-100 leading-relaxed">
+              <p className="text-whithe-100 leading-relaxed">
                 First Lego League desafía a los estudiantes a pensar como científicos e ingenieros. 
                 Los equipos deben completar misiones en el tablero de juego utilizando robots autónomos 
                 construidos con LEGO MINDSTORMS o SPIKE Prime.
               </p>
             </div>
             <div>
-              <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-red-300 to-blue-300 bg-clip-text text-transparent">Criterios de Evaluación</h3>
-              <ul className="text-blue-100 space-y-2">
+              <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-red-300 to-whithe-300 bg-clip-text text-transparent">Criterios de Evaluación</h3>
+              <ul className="text-whithe-100 space-y-2">
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-whithe-400 mr-2" />
                   15 Misiones con objetivos específicos
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-whithe-400 mr-2" />
                   Tokens de precisión y profesionalismo
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-whithe-400 mr-2" />
                   Trabajo en equipo y valores fundamentales
                 </li>
               </ul>

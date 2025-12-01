@@ -12,7 +12,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         {/* Header */}
         <div className="text-center mb-16">
           {/* Logos in top right */}
-          <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center space-x-2 md:space-x-4">
+          <div className="absolute top-6 right-4 md:top-6 md:right-6 flex items-center space-x-2 md:space-x-4">
             <img 
               src="./Imagen2.png" 
               alt="First Lego League" 

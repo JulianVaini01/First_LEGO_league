@@ -115,7 +115,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
           <button
             onClick={() => onNavigate('display')}
-            className="group bg-gradient-to-r from-green-500 to-red-500 hover:from-blue-600 hover:to-red-600 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-green-500 to-black500 hover:from-blue-600 hover:to-red-600 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <Zap className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />

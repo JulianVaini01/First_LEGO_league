@@ -478,7 +478,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         </div>
 
         {/* Bottom Section */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-1 gap-6 mb-8">
           {/* Precision Tokens */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
@@ -517,34 +517,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 <p>• 2 tokens: 15 puntos</p>
                 <p>• 1 token: 10 puntos</p>
               </div>
-            </div>
-          </div>
-          
-          {/* Equipment Inspection */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Inspección de Equipamiento</h3>
-            <div className="text-center">
-              <button
-                onClick={() => setEquipmentInspection(!equipmentInspection)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                  equipmentInspection
-                    ? 'bg-green-500 text-white shadow-lg'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {equipmentInspection ? 'Completada (+20 pts)' : 'No Completada (0 pts)'}
-              </button>
-              <div className="mt-4 bg-blue-50 rounded-lg p-3">
-                <div className="text-center">
-                  <span className="text-2xl font-bold text-blue-600">
-                    {equipmentInspection ? 20 : 0}
-                  </span>
-                  <span className="text-gray-500 ml-1">pts</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-3 text-xs text-gray-500 text-center">
-              <p>Verificación de que el robot cumple con las especificaciones técnicas</p>
             </div>
           </div>
         </div>

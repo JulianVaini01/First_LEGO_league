@@ -102,7 +102,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
           <button
             onClick={() => onNavigate('classification')}
-            className="group bg-gradient-to-r from-black-500 to-blue-500 hover:from-red-600 hover:to-blue-600 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-yellow-500 to-blue-500 hover:from-red-600 hover:to-blue-600 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <Trophy className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />

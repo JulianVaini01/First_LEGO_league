@@ -126,7 +126,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [table, setTable] = useState('Mesa 1');
   const [code, setCode] = useState('');
   const [missionScores, setMissionScores] = useState<Record<string, { completed: boolean; bonus: boolean; count: number }>>({});
-  const [professionalism, setProfessionalism] = useState(20);
   const [precisionTokens, setPrecisionTokens] = useState(6);
   const [equipmentInspection, setEquipmentInspection] = useState(false);
 
@@ -191,7 +190,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       return;
     }
 
-    const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + professionalism;
+    const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + (equipmentInspection ? 20 : 0);
 
     // 🚀 Enviar los datos a Google Sheets
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
@@ -202,7 +201,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       equipo: teamName || "",
       ronda: round || "",
       puntuacion: totalScore || 0,
-      profesionalismo: professionalism || 0,
+      equipmentInspection: equipmentInspection ? 20 : 0,
       inspeccion_equipamiento: equipmentInspection ? 20 : 0,
     };
 
@@ -231,7 +230,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       team: teamName,
       round,
       score: totalScore,
-      professionalism,
+      equipmentInspection: equipmentInspection ? 20 : 0,
       missions: Object.keys(missionScores).reduce((acc, key) => {
         acc[key] = missionScores[key].completed;
         return acc;
@@ -521,22 +520,31 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
             </div>
           </div>
           
-          {/* Professionalism */}
+          {/* Equipment Inspection */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Profesionalismo Cordial</h3>
-            <div className="flex items-center space-x-4">
-              <input
-                type="range"
-                min="0"
-                max="20"
-                value={professionalism}
-                onChange={(e) => setProfessionalism(Number(e.target.value))}
-                className="flex-1"
-              />
-              <span className="text-2xl font-bold text-blue-600 w-16 text-center">{professionalism}</span>
+            <h3 className="text-lg font-semibold mb-4">Inspección de Equipamiento</h3>
+            <div className="text-center">
+              <button
+                onClick={() => setEquipmentInspection(!equipmentInspection)}
+                className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                  equipmentInspection
+                    ? 'bg-green-500 text-white shadow-lg'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {equipmentInspection ? 'Completada (+20 pts)' : 'No Completada (0 pts)'}
+              </button>
+              <div className="mt-4 bg-blue-50 rounded-lg p-3">
+                <div className="text-center">
+                  <span className="text-2xl font-bold text-blue-600">
+                    {equipmentInspection ? 20 : 0}
+                  </span>
+                  <span className="text-gray-500 ml-1">pts</span>
+                </div>
+              </div>
             </div>
-            <div className="mt-3 text-xs text-gray-500">
-              <p>Evalúa el comportamiento del equipo durante la competencia</p>
+            <div className="mt-3 text-xs text-gray-500 text-center">
+              <p>Verificación de que el robot cumple con las especificaciones técnicas</p>
             </div>
           </div>
         </div>
@@ -545,7 +553,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Puntuación Total</h2>
           <div className="text-6xl font-bold mb-4">
-            {calculateTotal() + getPrecisionTokenPoints(precisionTokens) + professionalism}
+            {calculateTotal() + getPrecisionTokenPoints(precisionTokens) + (equipmentInspection ? 20 : 0)}
           </div>
           <div className="grid grid-cols-3 gap-4 text-sm text-blue-200 mt-4">
             <div>
@@ -557,8 +565,8 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               <p className="text-2xl">{getPrecisionTokenPoints(precisionTokens)}</p>
             </div>
             <div>
-              <p className="font-semibold">Profesionalismo</p>
-              <p className="text-2xl">{professionalism}</p>
+              <p className="font-semibold">Inspección</p>
+              <p className="text-2xl">{equipmentInspection ? 20 : 0}</p>
             </div>
           </div>
         </div>

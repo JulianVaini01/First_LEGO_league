@@ -16,7 +16,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
       totalScore: number;
       rounds: number;
       averageScore: number;
-      averageProfessionalism: number;
+      averageEquipmentInspection: number;
       bestRound: number;
     }>();
 
@@ -28,7 +28,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
         totalScore: 0,
         rounds: 0,
         averageScore: 0,
-        averageProfessionalism: 0,
+        averageEquipmentInspection: 0,
         bestRound: 0
       };
 
@@ -36,7 +36,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
       existing.rounds += 1;
       existing.bestScore = Math.max(existing.bestScore, score.score);
       existing.averageScore = existing.totalScore / existing.rounds;
-      existing.averageProfessionalism = ((existing.averageProfessionalism * (existing.rounds - 1)) + score.professionalism) / existing.rounds;
+      existing.averageEquipmentInspection = ((existing.averageEquipmentInspection * (existing.rounds - 1)) + score.equipmentInspection) / existing.rounds;
       
       if (score.score === existing.bestScore) {
         existing.bestRound = score.round;
@@ -242,7 +242,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                         Rondas
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Profesionalismo
+                        Inspección Equipamiento
                       </th>
                     </tr>
                   </thead>
@@ -286,8 +286,8 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="bg-indigo-600 h-2 rounded-full mr-2" style={{width: `${(team.averageProfessionalism / 20) * 100}%`, minWidth: '20px'}} />
-                            <span className="text-white font-semibold">{Math.round(team.averageProfessionalism)}</span>
+                            <div className={`w-4 h-4 rounded-full mr-2 ${team.averageEquipmentInspection > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
+                            <span className="text-white font-semibold">{Math.round(team.averageEquipmentInspection)} pts</span>
                           </div>
                         </td>
                       </tr>

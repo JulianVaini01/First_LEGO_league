@@ -17,7 +17,7 @@ export interface Score {
   team: string;
   round: number;
   score: number;
-  professionalism: number;
+  equipmentInspection: number;
   missions: Record<string, boolean>;
   precisionTokens: number;
 }

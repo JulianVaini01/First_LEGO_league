@@ -152,8 +152,8 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
                     <p className="text-3xl font-bold text-amber-400">{latestTableScore.score}</p>
                   </div>
                   <div>
-                    <p className="text-amber-200">Profesionalismo</p>
-                    <p className="text-xl font-bold">{latestTableScore.professionalism}</p>
+                    <p className="text-amber-200">Inspección</p>
+                    <p className="text-xl font-bold">{latestTableScore.equipmentInspection > 0 ? '20 pts' : '0 pts'}</p>
                   </div>
                 </div>
               </div>

@@ -164,7 +164,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
                       Puntuación
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                      Profesionalismo
+                      Inspección Equipamiento
                     </th>
                   </tr>
                 </thead>
@@ -203,8 +203,8 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="bg-purple-600 h-2 rounded-full mr-2" style={{width: `${(score.professionalism / 20) * 100}%`, minWidth: '20px'}} />
-                          <span className="text-white font-semibold">{score.professionalism}</span>
+                          <div className={`w-4 h-4 rounded-full mr-2 ${score.equipmentInspection > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
+                          <span className="text-white font-semibold">{score.equipmentInspection > 0 ? '20 pts' : '0 pts'}</span>
                         </div>
                       </td>
                     </tr>

@@ -273,9 +273,9 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               className="h-8 w-auto md:h-10"
             />
             <img 
-              src="./Imagen1.jpg" 
+              src="./Imagen1.png" 
               alt="UNNO" 
-              className="h-8 w-auto md:h-10 bg-white rounded-lg px-1 py-0.5 md:px-2 md:py-1"
+              className="h-8 w-auto md:h-10 rounded-lg px-1 py-0.5 md:px-2 md:py-1"
             />
             {/* Mobile logos */}
             <div className="md:hidden absolute top-4 right-4 flex items-center space-x-2">

@@ -89,7 +89,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
           <button
             onClick={() => onNavigate('records')}
-            className="group bg-gradient-to-r from-gold-500 to-red-600 hover:from-blue-600 hover:to-red-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-coral-500 to-red-600 hover:from-blue-600 hover:to-red-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <BarChart3 className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />

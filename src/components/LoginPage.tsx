@@ -42,7 +42,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         <img 
           src="./Imagen1.png" 
           alt="UNNO" 
-          className="h-8 w-auto md:h-12 bg-white rounded-lg px-1 py-0.5 md:px-2 md:py-1"
+          className="h-8 w-auto md:h-12 rounded-lg px-1 py-0.5 md:px-2 md:py-1"
         />
       </div>
       

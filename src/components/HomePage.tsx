@@ -26,26 +26,26 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
           
           <div className="flex items-center justify-center mb-6">
-            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full mr-4">
+            <div className="bg-gradient-to-r from-red-500 to-blue-600 p-4 rounded-full mr-4">
               <Trophy className="h-12 w-12 text-white" />
             </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              First Lego League
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-red-500 to-blue-600 bg-clip-text text-transparent">
+              UNEARTHED - Temporada 2025-2026
             </h1>
           </div>
           <p className="text-xl text-blue-200 max-w-3xl mx-auto leading-relaxed">
-            Sistema de Evaluación para Jurados
+            Sistema de Evaluación para Réferis
           </p>
         </div>
 
         {/* Competition Description */}
         <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 mb-12 border border-white/20">
-          <h2 className="text-3xl font-bold text-center mb-6 text-yellow-400">
+          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-red-400 to-blue-400 bg-clip-text text-transparent">
             UNEARTHED - Temporada 2025-2026
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-blue-300">Acerca de la Competencia</h3>
+              <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-red-300 to-blue-300 bg-clip-text text-transparent">Acerca de la Competencia</h3>
               <p className="text-blue-100 leading-relaxed">
                 First Lego League desafía a los estudiantes a pensar como científicos e ingenieros. 
                 Los equipos deben completar misiones en el tablero de juego utilizando robots autónomos 
@@ -53,7 +53,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               </p>
             </div>
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-blue-300">Criterios de Evaluación</h3>
+              <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-red-300 to-blue-300 bg-clip-text text-transparent">Criterios de Evaluación</h3>
               <ul className="text-blue-100 space-y-2">
                 <li className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
@@ -76,52 +76,52 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <button
             onClick={() => onNavigate('scoring')}
-            className="group bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-red-500 to-blue-600 hover:from-red-600 hover:to-blue-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <CheckCircle className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />
             </div>
             <h3 className="text-xl font-bold text-center mb-2">Puntuar</h3>
-            <p className="text-center text-green-100 text-sm">
+            <p className="text-center text-red-100 text-sm">
               Evaluar las 15 misiones del equipo
             </p>
           </button>
 
           <button
             onClick={() => onNavigate('records')}
-            className="group bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-blue-500 to-red-600 hover:from-blue-600 hover:to-red-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <BarChart3 className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />
             </div>
             <h3 className="text-xl font-bold text-center mb-2">Registros</h3>
-            <p className="text-center text-purple-100 text-sm">
+            <p className="text-center text-blue-100 text-sm">
               Historial de puntuaciones
             </p>
           </button>
 
           <button
             onClick={() => onNavigate('classification')}
-            className="group bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-red-500 to-blue-500 hover:from-red-600 hover:to-blue-600 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <Trophy className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />
             </div>
             <h3 className="text-xl font-bold text-center mb-2">Clasificación</h3>
-            <p className="text-center text-orange-100 text-sm">
+            <p className="text-center text-red-100 text-sm">
               Tabla de posiciones
             </p>
           </button>
 
           <button
             onClick={() => onNavigate('display')}
-            className="group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-blue-500 to-red-500 hover:from-blue-600 hover:to-red-600 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <Zap className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />
             </div>
             <h3 className="text-xl font-bold text-center mb-2">Pantalla</h3>
-            <p className="text-center text-cyan-100 text-sm">
+            <p className="text-center text-blue-100 text-sm">
               Mostrar puntuación actual
             </p>
           </button>
@@ -130,7 +130,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         {/* Footer */}
         <div className="text-center mt-16 text-blue-300">
           <p className="text-sm">
-            First Lego League - Sistema de Evaluación Digital
+            UNEARTHED 2025-2026 - Sistema de Evaluación Digital para Réferis
           </p>
           <p className="text-xs mt-2 text-blue-400">
             Desarrollado para facilitar la evaluación de competencias

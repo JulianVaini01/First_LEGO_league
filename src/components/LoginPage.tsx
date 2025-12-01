@@ -49,14 +49,14 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 w-full max-w-md border border-white/20">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+          <div className="bg-gradient-to-r from-red-500 to-blue-600 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
             <Trophy className="h-10 w-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Acceso de Jurado
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-blue-400 bg-clip-text text-transparent mb-2">
+            Acceso de Réferi
           </h1>
           <p className="text-blue-200">
-            First Lego League - Sistema de Evaluación
+            UNEARTHED 2025-2026 - Sistema de Evaluación
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-white text-sm font-medium mb-2">
-              Contraseña de Jurado
+              Contraseña de Réferi
             </label>
             <div className="relative">
               <input
@@ -94,7 +94,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+            className="w-full bg-gradient-to-r from-red-500 to-blue-600 hover:from-red-600 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
           >
             {isLoading ? (
               <>
@@ -119,7 +119,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 Sistema Protegido
               </h3>
               <p className="text-blue-300 text-xs">
-                Solo los jurados autorizados pueden acceder al sistema de puntuación.
+                Solo los réferis autorizados pueden acceder al sistema de puntuación.
                 Si no tienes la contraseña, contacta al coordinador del torneo.
               </p>
             </div>
@@ -129,7 +129,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-blue-300 text-xs">
-            First Lego League - Temporada 2025-2026
+            UNEARTHED - Temporada 2025-2026
           </p>
         </div>
       </div>

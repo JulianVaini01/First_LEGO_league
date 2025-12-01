@@ -263,7 +263,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
             >
               <ArrowLeft className="h-6 w-6" />
             </button>
-            <h1 className="text-2xl font-bold">Hoja de Puntajes</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-red-300 to-blue-300 bg-clip-text text-transparent">Hoja de Puntajes - UNEARTHED 2025-2026</h1>
           </div>
           {/* Logos in top right */}
           <div className="hidden md:flex items-center space-x-4">
@@ -292,7 +292,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
             </div>
             <button
               onClick={handleSave}
-              className="bg-green-500 hover:bg-green-600 px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              className="bg-gradient-to-r from-red-500 to-blue-600 hover:from-red-600 hover:to-blue-700 px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <Save className="h-5 w-5" />
               <span>Generar</span>
@@ -522,12 +522,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         </div>
 
         {/* Total Score */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Puntuación Total</h2>
+        <div className="bg-gradient-to-r from-red-600 to-blue-700 text-white rounded-xl shadow-lg p-8 text-center">
+          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">Puntuación Total</h2>
           <div className="text-6xl font-bold mb-4">
             {calculateTotal() + getPrecisionTokenPoints(precisionTokens) + (equipmentInspection ? 20 : 0)}
           </div>
-          <div className="grid grid-cols-3 gap-4 text-sm text-blue-200 mt-4">
+          <div className="grid grid-cols-3 gap-4 text-sm text-red-200 mt-4">
             <div>
               <p className="font-semibold">Misiones</p>
               <p className="text-2xl">{calculateTotal()}</p>

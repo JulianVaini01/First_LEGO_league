@@ -39,7 +39,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
                 className="h-8 w-auto md:h-10"
               />
               <img 
-                src="./Imagen1.jpg" 
+                src="./Imagen1.png" 
                 alt="UNNO" 
                 className="h-8 w-auto md:h-10 bg-white rounded-lg px-1 py-0.5 md:px-2 md:py-1"
               />

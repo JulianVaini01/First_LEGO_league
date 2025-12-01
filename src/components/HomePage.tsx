@@ -76,7 +76,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <button
             onClick={() => onNavigate('scoring')}
-            className="group bg-gradient-to-r from-orange-500 to-blue-600 hover:from-red-600 hover:to-blue-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+            className="group bg-gradient-to-r from-orange-500 to-pink-600 hover:from-red-600 hover:to-blue-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-center mb-4">
               <CheckCircle className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />

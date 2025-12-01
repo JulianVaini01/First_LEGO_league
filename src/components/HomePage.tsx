@@ -7,7 +7,7 @@ interface HomePageProps {
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-red-800 to-indigo-1000 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-red-800 to-indigo-800 text-white">
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
         <div className="text-center mb-16">

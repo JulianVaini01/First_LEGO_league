@@ -287,7 +287,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               <img 
                 src="./Imagen1.jpg" 
                 alt="UNNO" 
-                className="h-6 w-auto bg-white rounded px-1 py-0.5"
+                className="h-6 w-auto rounded px-1 py-0.5"
               />
             </div>
             <button

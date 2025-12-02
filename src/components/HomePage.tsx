@@ -7,6 +7,14 @@ interface HomePageProps {
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   return (
+     <div className="min-h-screen bg-gray-900 relative">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-40 z-0"
+        style={{
+          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
+        }}
+      />
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-red-600 to-indigo-500 text-white">
       <div className="container mx-auto px-6 py-12">
         {/* Header */}

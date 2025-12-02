@@ -433,43 +433,31 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   {mission.maxCount ? (
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                      <label className="text-sm font-medium text-gray-700">Cantidad:</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max={mission.maxCount}
-                        value={missionScores[mission.id]?.count || 0}
-                        onChange={(e) => handleCountChange(mission.id, Number(e.target.value))}
-                        className="w-20 p-2 border border-gray-300 rounded-lg text-center"
-                      />
-                      <span className="text-sm text-gray-500">/ {mission.maxCount}</span>
+                        <label className="text-sm font-medium text-gray-700">Cantidad:</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={mission.maxCount}
+                          value={missionScores[mission.id]?.count || 0}
+                          onChange={(e) => handleCountChange(mission.id, Number(e.target.value))}
+                          className="w-20 p-2 border border-gray-300 rounded-lg text-center"
+                        />
+                        <span className="text-sm text-gray-500">/ {mission.maxCount}</span>
+                      </div>
                     </div>
                   ) : (
-                   <div className="flex items-center space-x-4">
-                    <button
-                      onClick={() => handleMissionToggle(mission.id, 'completed')}
-                      className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                        missionScores[mission.id]?.completed
-                          ? 'bg-green-500 text-white shadow-lg'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      {missionScores[mission.id]?.completed ? 'Completada' : 'No Completada'}
-                    </button>
-                     
-                     {mission.bonus && (
-                       <button
-                         onClick={() => handleMissionToggle(mission.id, 'bonus')}
-                         className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                           missionScores[mission.id]?.bonus
-                             ? 'bg-yellow-500 text-white shadow-lg'
-                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                         }`}
-                       >
-                         Bonus: {mission.bonus.description} (+{mission.bonus.points})
-                       </button>
-                     )}
-                      
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={() => handleMissionToggle(mission.id, 'completed')}
+                        className={`px-6 py-2 rounded-lg font-medium transition-all ${
+                          missionScores[mission.id]?.completed
+                            ? 'bg-green-500 text-white shadow-lg'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {missionScores[mission.id]?.completed ? 'Completada' : 'No Completada'}
+                      </button>
+
                       {mission.bonus && (
                         <button
                           onClick={() => handleMissionToggle(mission.id, 'bonus')}
@@ -482,7 +470,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                           Bonus: {mission.bonus.description} (+{mission.bonus.points})
                         </button>
                       )}
-                   </div>
+                    </div>
                   )}
                 </div>
               </div>

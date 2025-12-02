@@ -11,9 +11,10 @@ const missions = [
   {
     id: 'm01',
     name: 'Cepillado de Superficie',
-    description: 'Cepillo tocando la lona',
+    description: 'Sedimentos completamente despejados del sitio de excavación',
     points: 10,
-    maxCount: 3,
+    maxCount: 2,
+    bonus: { description: 'El cepillo de arqueología no toca el sitio de excavación', points: 10 },
     hasNoEquipment: true
   },
   {
@@ -430,7 +431,8 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               <div className="p-4">
                 <div className="flex items-center space-x-4">
                   {mission.maxCount ? (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
                       <label className="text-sm font-medium text-gray-700">Cantidad:</label>
                       <input
                         type="number"
@@ -467,6 +469,19 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                          Bonus: {mission.bonus.description} (+{mission.bonus.points})
                        </button>
                      )}
+                      
+                      {mission.bonus && (
+                        <button
+                          onClick={() => handleMissionToggle(mission.id, 'bonus')}
+                          className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                            missionScores[mission.id]?.bonus
+                              ? 'bg-yellow-500 text-white shadow-lg'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          Bonus: {mission.bonus.description} (+{mission.bonus.points})
+                        </button>
+                      )}
                    </div>
                   )}
                 </div>

@@ -41,7 +41,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
               <img
                 src="./Imagen1.png"
                 alt="UNNO"
-                className="h-15 w-auto rounded-lg px-1 py-0.5"
+                className="h-18 w-auto rounded-lg px-1 py-0.5"
               />
             </div>
             {/* Mobile logos */}

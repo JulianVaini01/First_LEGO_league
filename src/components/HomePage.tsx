@@ -24,12 +24,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <img
                 src="./Imagen2.png"
                 alt="First Lego League"
-                className="h-12 w-auto md:h-25"
+                className="h-12 w-auto md:h-20"
               />
               <img
                 src="./Imagen1.png"
                 alt="UNNO"
-                className="h-12 w-auto md:h-25 rounded-lg px-1 py-0.5 md:px-2 md:py-1"
+                className="h-12 w-auto md:h-20 rounded-lg px-1 py-0.5 md:px-2 md:py-1"
               />
             </div>
 

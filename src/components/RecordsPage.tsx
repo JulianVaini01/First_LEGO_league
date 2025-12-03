@@ -36,7 +36,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
               <img
                 src="./Imagen2.png"
                 alt="First Lego League"
-                className="h-16 w-auto"
+                className="h-17 w-auto"
               />
               <img
                 src="./Imagen1.png"

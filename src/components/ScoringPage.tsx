@@ -11,7 +11,7 @@ const missions = [
   {
     id: 'm01',
     name: 'Cepillado de Superficie',
-    description: 'Sedimentos completamente despejados del sitio de excavación',
+    description: 'El cepillo de arqueología no toca el sitio de excavación',
     points: 10,
     maxCount: 2,
     bonus: { description: 'El cepillo de arqueología no toca el sitio de excavación', points: 10 },

@@ -12,7 +12,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-40 z-0"
         style={{
-          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
+          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2 copy.jpg)'
         }}
       />
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-red-600 to-indigo-500 text-white relative z-10">

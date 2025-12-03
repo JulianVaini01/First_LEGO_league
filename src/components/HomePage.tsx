@@ -15,7 +15,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
         }}
       />
- 
+        <div className="min-h-screen text-white relative z-10">
         <div className="container mx-auto px-6 py-12">
           {/* Header */}
           <div className="text-center mb-16">

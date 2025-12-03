@@ -12,10 +12,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-40 z-0"
         style={{
-          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2 copy.jpg)'
+          backgroundImage: 'url(./FIRST_AGE-powerpoint-template2.jpg)'
         }}
       />
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-red-600 to-indigo-500 text-white relative z-10">
+ 
         <div className="container mx-auto px-6 py-12">
           {/* Header */}
           <div className="text-center mb-16">
@@ -24,12 +24,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <img
                 src="./Imagen2.png"
                 alt="First Lego League"
-                className="h-12 w-auto md:h-22"
+                className="h-12 w-auto md:h-25"
               />
               <img
                 src="./Imagen1.png"
                 alt="UNNO"
-                className="h-12 w-auto md:h-22 rounded-lg px-1 py-0.5 md:px-2 md:py-1"
+                className="h-12 w-auto md:h-25 rounded-lg px-1 py-0.5 md:px-2 md:py-1"
               />
             </div>
 

@@ -121,60 +121,6 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
           </div>
         )}
 
-        {/* Table Selection */}
-        <div className="bg-black/70 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-amber-500/20">
-          <h3 className="text-xl font-bold text-white mb-4">Seleccionar Mesa</h3>
-          <select
-            value={selectedTable}
-            onChange={(e) => setSelectedTable(e.target.value)}
-            className="w-full p-3 bg-black/50 border border-amber-500/30 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-          >
-            {Array.from({length: 8}, (_, i) => (
-              <option key={i} value={`Mesa ${i + 1}`} className="bg-gray-900">Mesa {i + 1}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Table Specific Display */}
-        {latestTableScore && selectedTable !== 'Mesa 8' && (
-          <div className="bg-black/70 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-amber-500/20">
-            <h3 className="text-xl font-bold text-white mb-4">Última Puntuación - {selectedTable}</h3>
-            <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6 border border-amber-400/30">
-              <div className="text-white">
-                <h4 className="text-2xl font-bold mb-2">{latestTableScore.team}</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-amber-200">Ronda</p>
-                    <p className="text-xl font-bold">{latestTableScore.round}</p>
-                  </div>
-                  <div>
-                    <p className="text-amber-200">Puntuación</p>
-                    <p className="text-3xl font-bold text-amber-400">{latestTableScore.score}</p>
-                  </div>
-                  <div>
-                    <p className="text-amber-200">Inspección</p>
-                    <p className="text-xl font-bold">{latestTableScore.equipmentInspection > 0 ? '20 pts' : '0 pts'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={() => onNavigate('scoring')}
-            className="flex-1 bg-black/80 hover:bg-black/90 border border-amber-500/50 hover:border-amber-400 text-white py-4 px-6 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all transform hover:scale-105"
-          >
-            <Plus className="h-5 w-5" />
-            <span>Nueva Puntuación</span>
-          </button>
-          
-          <button
-            onClick={() => onNavigate('home')}
-            className="bg-black/60 hover:bg-black/80 border border-gray-500/50 hover:border-gray-400 text-white py-4 px-6 rounded-xl font-semibold transition-all"
-          >
             Volver al Inicio
           </button>
         </div>

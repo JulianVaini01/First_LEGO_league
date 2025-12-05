@@ -121,9 +121,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
           </div>
         )}
 
-            Volver al Inicio
-          </button>
-        </div>
+       
 
         {/* Recent Scores Table */}
         {scores.length > 0 && (

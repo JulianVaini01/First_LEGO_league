@@ -31,7 +31,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-black-600 to-indigo-900 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-darck-600 to-indigo-900 flex items-center justify-center p-6">
       {/* Logos in top right */}
       <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center space-x-2 md:space-x-4 z-10">
         <img 

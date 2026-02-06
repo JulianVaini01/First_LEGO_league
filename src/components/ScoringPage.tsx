@@ -274,20 +274,20 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               className="h-12 w-auto"
             />
             <img
-              src="./Imagen1.png"
+              src="./Imagen1.jpg"
               alt="UNNO"
               className="h-12 w-auto rounded-lg px-1 py-0.5"
             />
             {/* Mobile logos */}
             <div className="md:hidden absolute top-4 right-4 flex items-center space-x-2">
-              <img 
-                src="./Imagen2.png" 
-                alt="First Lego League" 
+              <img
+                src="./Imagen2.png"
+                alt="First Lego League"
                 className="h-6 w-auto"
               />
-              <img 
-                src="./Imagen1.png" 
-                alt="UNNO" 
+              <img
+                src="./Imagen1.jpg"
+                alt="UNNO"
                 className="h-6 w-auto rounded px-1 py-0.5"
               />
             </div>
@@ -422,7 +422,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                     )}
                   </h3>
                   <div className="text-right">
-                    <span className="text-2xl font-bold text-blue-600">{mission.points}</span>
+                    <span className="text-2xl font-bold text-blue-600">
+                      {mission.maxCount
+                        ? (missionScores[mission.id]?.count || 0) * mission.points
+                        : (missionScores[mission.id]?.completed ? mission.points : 0)
+                      }
+                    </span>
                     <span className="text-gray-500 ml-1">pts</span>
                   </div>
                 </div>

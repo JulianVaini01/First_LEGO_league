@@ -423,10 +423,10 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   </h3>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-blue-600">
-                      {mission.maxCount
+                      {(mission.maxCount
                         ? (missionScores[mission.id]?.count || 0) * mission.points
                         : (missionScores[mission.id]?.completed ? mission.points : 0)
-                      }
+                      ) + (mission.bonus && missionScores[mission.id]?.bonus ? mission.bonus.points : 0)}
                     </span>
                     <span className="text-gray-500 ml-1">pts</span>
                   </div>

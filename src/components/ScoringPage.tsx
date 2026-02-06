@@ -356,13 +356,19 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         {/* Restrictions */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-            <div className="flex items-start space-x-3">
-              <AlertTriangle className="h-6 w-6 text-orange-500 mt-1 flex-shrink-0" />
-              <div>
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <img
+                  src="./image-copy.png"
+                  alt="No equipamiento"
+                  className="h-16 w-16 object-contain"
+                />
+              </div>
+              <div className="flex-1">
                 <h3 className="font-semibold text-orange-800 mb-2">Restricción de No Equipamiento</h3>
                 <p className="text-sm text-orange-700">
-                  Cuando este símbolo aparezca en la esquina superior derecha de una misión, 
-                  ningún equipamiento puede tocar ninguna parte de este modelo de misión 
+                  Cuando este símbolo aparezca en la esquina superior derecha de una misión,
+                  ningún equipamiento puede tocar ninguna parte de este modelo de misión
                   al final de la partida para puntuar en esta misión.
                 </p>
               </div>

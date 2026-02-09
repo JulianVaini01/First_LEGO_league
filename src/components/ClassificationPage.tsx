@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { ArrowLeft, Trophy, Medal, Award } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { ArrowLeft, Trophy, Medal, Award, RefreshCw } from 'lucide-react';
 import { Score } from '../App';
 
 interface ClassificationPageProps {
@@ -7,8 +7,53 @@ interface ClassificationPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
 }
 
+interface GoogleSheetTeam {
+  team: string;
+  code: string;
+  bestScore: number;
+  totalScore: number;
+  rounds: number;
+  averageScore: number;
+  averageEquipmentInspection: number;
+  bestRound: number;
+  position?: number;
+}
+
 export default function ClassificationPage({ scores, onNavigate }: ClassificationPageProps) {
+  const [googleSheetData, setGoogleSheetData] = useState<GoogleSheetTeam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  const fetchGoogleSheetData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec');
+      const data = await response.json();
+
+      if (data && Array.isArray(data)) {
+        setGoogleSheetData(data);
+        setLastUpdate(new Date());
+      }
+    } catch (error) {
+      console.error('Error fetching Google Sheet data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGoogleSheetData();
+    const interval = setInterval(fetchGoogleSheetData, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
   const standings = useMemo(() => {
+    if (googleSheetData.length > 0) {
+      return googleSheetData
+        .sort((a, b) => b.bestScore - a.bestScore)
+        .map((team, index) => ({ ...team, position: index + 1 }));
+    }
+
     const teamStats = new Map<string, {
       team: string;
       code: string;
@@ -37,7 +82,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
       existing.bestScore = Math.max(existing.bestScore, score.score);
       existing.averageScore = existing.totalScore / existing.rounds;
       existing.averageEquipmentInspection = ((existing.averageEquipmentInspection * (existing.rounds - 1)) + score.equipmentInspection) / existing.rounds;
-      
+
       if (score.score === existing.bestScore) {
         existing.bestRound = score.round;
       }
@@ -48,7 +93,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
     return Array.from(teamStats.values())
       .sort((a, b) => b.bestScore - a.bestScore)
       .map((team, index) => ({ ...team, position: index + 1 }));
-  }, [scores]);
+  }, [googleSheetData, scores]);
 
   const getPodiumIcon = (position: number) => {
     switch (position) {
@@ -117,8 +162,20 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
               >
                 <ArrowLeft className="h-6 w-6" />
               </button>
-              <h1 className="text-3xl font-bold text-white">Tabla de Clasificación</h1>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Tabla de Clasificación</h1>
+                {lastUpdate && (
+                  <p className="text-xs text-gray-400">Actualizado: {lastUpdate.toLocaleTimeString('es-ES')}</p>
+                )}
+              </div>
             </div>
+            <button
+              onClick={fetchGoogleSheetData}
+              disabled={loading}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white disabled:opacity-50"
+            >
+              <RefreshCw className={`h-6 w-6 ${loading ? 'animate-spin' : ''}`} />
+            </button>
             {/* Logos in top right */}
             <div className="hidden md:flex items-center space-x-4 mr-8">
               <img

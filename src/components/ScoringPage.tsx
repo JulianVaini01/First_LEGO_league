@@ -355,7 +355,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         </div>
 
         {/* Restrictions */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-5 gap-6 mb-8">
           <div className="bg-orange-100 border border-orange-200 rounded-xl p-6">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">

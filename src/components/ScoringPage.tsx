@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Save, AlertTriangle, Settings } from 'lucide-react';
 import { Score } from '../App';
+import noEquipmentImg from '../assets/no-equipment.png';
 
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
@@ -359,7 +360,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <img
-                  src="/no-equipment.png"
+                  src={noEquipmentImg}
                   alt="No equipamiento"
                   className="h-16 w-16 object-contain"
                 />

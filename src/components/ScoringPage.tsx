@@ -360,7 +360,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <img
-                  src={noEquipmentImg}
+                  src={noEquipment}
                   alt="No equipamiento"
                   className="h-16 w-16 object-contain"
                 />

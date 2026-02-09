@@ -362,7 +362,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 <img
                   src={noEquipmentImg}
                   alt="No equipamiento"
-                  className="h-17 w-16 object-contain"
+                  className="h-17,1 w-17,1 object-contain"
                 />
               </div>
               <div className="flex-1">

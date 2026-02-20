@@ -24,22 +24,41 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  const fetchGoogleSheetData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec');
-      const data = await response.json();
+ const fetchGoogleSheetData = async () => {
+  try {
+    setLoading(true);
 
-      if (data && Array.isArray(data)) {
-        setGoogleSheetData(data);
-        setLastUpdate(new Date());
-      }
-    } catch (error) {
-      console.error('Error fetching Google Sheet data:', error);
-    } finally {
-      setLoading(false);
+    const response = await fetch(
+      'https://script.google.com/macros/s/AKfycbx97zrhJjtuQd4oA2JdOvSqhp_p2HhF09Q6_h1xgSK_cBd-ODdAIHVmJ2aA40UmrZcH2w/exec'
+    );
+
+    const data = await response.json();
+
+    if (data && Array.isArray(data)) {
+
+      // 🔥 IMPORTANTE: Ignorar encabezados si existen
+      const formatted = data.slice(1).map((row: any[]) => ({
+        team: row[2],
+        code: row[1],
+        bestScore: row[5],
+        totalScore: row[5],
+        rounds: row[4],
+        averageScore: row[5],
+        averageEquipmentInspection: row[6],
+        bestRound: row[4],
+      }));
+
+      setGoogleSheetData(formatted);
+      setLastUpdate(new Date());
     }
-  };
+
+  } catch (error) {
+    console.error('Error fetching Google Sheet data:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchGoogleSheetData();

@@ -38,15 +38,16 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
 
       // 🔥 IMPORTANTE: Ignorar encabezados si existen
       const formatted = data.slice(1).map((row: any[]) => ({
-        team: row[2],
-        code: row[1],
-        bestScore: row[5],
-        totalScore: row[5],
-        rounds: row[4],
-        averageScore: row[5],
-        averageEquipmentInspection: row[6],
-        bestRound: row[4],
-      }));
+  team: row[3],                 // ✅ EQUIPO (antes era row[2])
+  code: row[1],                 // CODIGO
+  bestScore: Number(row[5]),    // PUNTUACION
+  totalScore: Number(row[5]),
+  rounds: Number(row[4]),       // RONDA
+  averageScore: Number(row[5]),
+  averageEquipmentInspection: Number(row[6]),
+  bestRound: Number(row[4]),
+}));
+
 
       setGoogleSheetData(formatted);
       setLastUpdate(new Date());

@@ -183,7 +183,7 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                 <ArrowLeft className="h-6 w-6" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-white">Table de Clasificación</h1>
+                <h1 className="text-3xl font-bold text-white">Tabla de Clasificación</h1>
                 {lastUpdate && (
                   <p className="text-xs text-gray-400">Actualizado: {lastUpdate.toLocaleTimeString('es-ES')}</p>
                 )}

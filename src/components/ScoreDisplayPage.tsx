@@ -1,18 +1,80 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Trophy, TrendingUp } from 'lucide-react';
 import { Score } from '../App';
+import { supabase } from '../lib/supabase';
 
 interface ScoreDisplayPageProps {
   scores: Score[];
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
 }
 
+interface TeamScore {
+  team_id: string;
+  team_name: string;
+  team_code: string;
+  total_score: number;
+  round_count: number;
+  best_score: number;
+  rounds: Array<{ round: number; score: number }>;
+}
+
 export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPageProps) {
-  const [selectedTable, setSelectedTable] = useState('Mesa 8');
-  
-  const latestScore = scores.length > 0 ? scores[scores.length - 1] : null;
-  const tableScores = scores.filter(score => score.table === selectedTable);
-  const latestTableScore = tableScores.length > 0 ? tableScores[tableScores.length - 1] : null;
+  const [teamScores, setTeamScores] = useState<TeamScore[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadTeamScores();
+
+    const interval = setInterval(() => {
+      loadTeamScores();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadTeamScores = async () => {
+    const { data: allScores } = await supabase
+      .from('team_scores')
+      .select('*, teams(name, code)')
+      .order('score', { ascending: false });
+
+    if (allScores) {
+      const teamMap = new Map<string, TeamScore>();
+
+      allScores.forEach((score: any) => {
+        const teamId = score.team_id;
+        if (!teamMap.has(teamId)) {
+          teamMap.set(teamId, {
+            team_id: teamId,
+            team_name: score.teams?.name || 'N/A',
+            team_code: score.teams?.code || 'N/A',
+            total_score: 0,
+            round_count: 0,
+            best_score: 0,
+            rounds: []
+          });
+        }
+
+        const teamData = teamMap.get(teamId)!;
+        teamData.rounds.push({ round: score.round, score: score.score });
+        teamData.round_count++;
+        teamData.best_score = Math.max(teamData.best_score, score.score);
+      });
+
+      const teamsArray = Array.from(teamMap.values()).map(team => {
+        const sortedRounds = team.rounds.sort((a, b) => b.score - a.score);
+        const topRounds = sortedRounds.slice(0, 3);
+        team.total_score = topRounds.reduce((sum, round) => sum + round.score, 0);
+        return team;
+      });
+
+      teamsArray.sort((a, b) => b.total_score - a.total_score);
+
+      setTeamScores(teamsArray);
+    }
+
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 relative">
@@ -87,30 +149,97 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto p-6 relative z-10">
-        {/* Main Score Display */}
-        {latestScore ? (
-          <div className="bg-black/70 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-amber-500/20">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">Última Puntuación</h2>
-              <div className="bg-black/80 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-amber-400/30">
-                <div className="text-white">
-                  <h3 className="text-3xl font-bold mb-2">{latestScore.team}</h3>
-                  <p className="text-amber-200 mb-4">Ronda {latestScore.round}</p>
-                  <div className="text-6xl font-bold mb-4">{latestScore.score}</div>
-                  <p className="text-lg">Profesionalismo: {latestScore.professionalism}</p>
-                </div>
+      <div className="max-w-7xl mx-auto p-6 relative z-10">
+        {/* Team Standings */}
+        {loading ? (
+          <div className="bg-black/70 backdrop-blur-sm rounded-3xl p-12 mb-8 border border-amber-500/20 text-center">
+            <div className="text-6xl mb-4">⏳</div>
+            <p className="text-white text-xl mb-2">Cargando puntuaciones...</p>
+          </div>
+        ) : teamScores.length > 0 ? (
+          <div className="bg-black/70 backdrop-blur-sm rounded-2xl p-6 border border-amber-500/20">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center">
+                <Trophy className="h-8 w-8 text-amber-400 mr-3" />
+                Clasificación General
+              </h2>
+              <div className="text-sm text-gray-400">
+                Se suman las mejores 3 rondas de cada equipo
               </div>
-              <div className="grid grid-cols-2 gap-4 text-white">
-                <div className="bg-black/50 rounded-xl p-4 border border-amber-500/20">
-                  <p className="text-gray-300">Mesa</p>
-                  <p className="text-xl font-bold">{latestScore.table}</p>
-                </div>
-                <div className="bg-black/50 rounded-xl p-4 border border-amber-500/20">
-                  <p className="text-gray-300">Código</p>
-                  <p className="text-xl font-bold">{latestScore.code}</p>
-                </div>
-              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-amber-500/30">
+                    <th className="text-left py-4 px-4 text-amber-300 font-bold">Posición</th>
+                    <th className="text-left py-4 px-4 text-amber-300 font-bold">Código</th>
+                    <th className="text-left py-4 px-4 text-amber-300 font-bold">Equipo</th>
+                    <th className="text-center py-4 px-4 text-amber-300 font-bold">Rondas</th>
+                    <th className="text-center py-4 px-4 text-amber-300 font-bold">Mejor Ronda</th>
+                    <th className="text-right py-4 px-4 text-amber-300 font-bold">Total Acumulado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teamScores.map((team, index) => (
+                    <tr
+                      key={team.team_id}
+                      className={`border-b border-amber-500/10 transition-all duration-300 ${
+                        index < 3 ? 'bg-amber-500/10' : 'hover:bg-white/5'
+                      }`}
+                    >
+                      <td className="py-4 px-4">
+                        <div className="flex items-center">
+                          {index === 0 && (
+                            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center mr-3">
+                              <Trophy className="h-6 w-6 text-white" />
+                            </div>
+                          )}
+                          {index === 1 && (
+                            <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center mr-3">
+                              <Trophy className="h-6 w-6 text-white" />
+                            </div>
+                          )}
+                          {index === 2 && (
+                            <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center mr-3">
+                              <Trophy className="h-6 w-6 text-white" />
+                            </div>
+                          )}
+                          <span className={`text-2xl font-bold ${
+                            index < 3 ? 'text-amber-400' : 'text-white'
+                          }`}>
+                            {index + 1}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-gray-300 font-mono text-sm">{team.team_code}</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-white font-semibold text-lg">{team.team_name}</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="text-gray-300">{team.round_count}</span>
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30">
+                          <TrendingUp className="h-4 w-4 text-green-400 mr-1" />
+                          <span className="text-green-400 font-bold">{team.best_score}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <span className={`text-3xl font-bold ${
+                          index === 0 ? 'text-yellow-400' :
+                          index === 1 ? 'text-gray-400' :
+                          index === 2 ? 'text-orange-500' :
+                          'text-amber-400'
+                        }`}>
+                          {team.total_score}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         ) : (
@@ -118,37 +247,6 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
             <div className="text-6xl mb-4">📊</div>
             <p className="text-white text-xl mb-2">No hay puntuaciones registradas</p>
             <p className="text-gray-400">Las puntuaciones aparecerán aquí en tiempo real</p>
-          </div>
-        )}
-
-       
-
-        {/* Recent Scores Table */}
-        {scores.length > 0 && (
-          <div className="bg-black/70 backdrop-blur-sm rounded-2xl p-6 mt-8 border border-amber-500/20">
-            <h3 className="text-xl font-bold text-white mb-4">Puntuaciones Recientes</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-amber-500/20">
-                    <th className="text-left py-3 text-gray-300">Equipo</th>
-                    <th className="text-left py-3 text-gray-300">Mesa</th>
-                    <th className="text-left py-3 text-gray-300">Ronda</th>
-                    <th className="text-left py-3 text-gray-300">Puntuación</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {scores.slice(-5).reverse().map((score) => (
-                    <tr key={score.id} className="border-b border-amber-500/10">
-                      <td className="py-3 text-white font-semibold">{score.team}</td>
-                      <td className="py-3 text-gray-300">{score.table}</td>
-                      <td className="py-3 text-gray-300">R{score.round}</td>
-                      <td className="py-3 text-amber-400 font-bold">{score.score}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
         )}
       </div>

@@ -65,7 +65,10 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
           }
         });
 
-        const formatted = Array.from(teamStatsMap.values());
+        const formatted = Array.from(teamStatsMap.values()).map(team => ({
+          ...team,
+          averageScore: team.totalScore / team.rounds
+        }));
         setGoogleSheetData(formatted);
         setLastUpdate(new Date());
       }

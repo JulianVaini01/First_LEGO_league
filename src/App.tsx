@@ -25,7 +25,9 @@ export interface Score {
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [scores, setScores] = useState<Score[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('fll_authenticated') === 'true';
+  });
 
   const addScore = (score: Omit<Score, 'id' | 'timestamp'>) => {
     const newScore: Score = {
@@ -36,9 +38,13 @@ function App() {
     setScores(prev => [...prev, newScore]);
   };
 
-  // Si no está autenticado, mostrar página de login
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    localStorage.setItem('fll_authenticated', 'true');
+  };
+
   if (!isAuthenticated) {
-    return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
+    return <LoginPage onLogin={handleLogin} />;
   }
 
   const renderPage = () => {

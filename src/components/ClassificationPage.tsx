@@ -38,6 +38,9 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
         const teamStatsMap = new Map();
 
         scoresData.forEach((score: any) => {
+          // Excluir Ronda 0 (ronda de prueba) de la clasificación
+          if (score.round === 0) return;
+
           const teamId = score.team_id;
           const team = score.teams;
 
@@ -105,6 +108,9 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
     }>();
 
     scores.forEach(score => {
+      // Excluir Ronda 0 (ronda de prueba) de la clasificación
+      if (score.round === 0) return;
+
       const existing = teamStats.get(score.team) || {
         team: score.team,
         code: score.code,

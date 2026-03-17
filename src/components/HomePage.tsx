@@ -1,11 +1,25 @@
-import React from 'react';
-import { Trophy, CheckCircle, Users, BarChart3, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trophy, CheckCircle, Users, BarChart3, Zap, Database } from 'lucide-react';
+import { seedTeams } from '../utils/seedTeams';
 
 interface HomePageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
 }
 
 export default function HomePage({ onNavigate }: HomePageProps) {
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const handleSeedTeams = async () => {
+    setIsSeeding(true);
+    try {
+      await seedTeams();
+      alert('Equipos cargados exitosamente en la base de datos');
+    } catch (error) {
+      console.error('Error cargando equipos:', error);
+      alert('Error al cargar equipos');
+    }
+    setIsSeeding(false);
+  };
   return (
     <div className="min-h-screen bg-gray-900 relative">
       {/* Background Image */}
@@ -132,6 +146,18 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <p className="text-center text-blue-100 text-sm">
                 Mostrar puntuación actual
               </p>
+            </button>
+          </div>
+
+          {/* Admin Section */}
+          <div className="mt-12 flex justify-center">
+            <button
+              onClick={handleSeedTeams}
+              disabled={isSeeding}
+              className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <Database className="h-5 w-5" />
+              <span>{isSeeding ? 'Cargando equipos...' : 'Cargar equipos en BD'}</span>
             </button>
           </div>
 

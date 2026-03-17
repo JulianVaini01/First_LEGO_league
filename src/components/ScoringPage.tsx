@@ -541,15 +541,17 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
                         <label className="text-sm font-medium text-gray-700">Cantidad:</label>
-                        <input
-                          type="number"
-                          min="0"
-                          max={mission.maxCount}
+                        <select
                           value={missionScores[mission.id]?.count || 0}
                           onChange={(e) => handleCountChange(mission.id, Number(e.target.value))}
-                          className="w-20 p-2 border border-gray-300 rounded-lg text-center"
-                        />
-                        <span className="text-sm text-gray-500">/ {mission.maxCount}</span>
+                          className="w-24 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        >
+                          {Array.from({ length: mission.maxCount + 1 }, (_, i) => (
+                            <option key={i} value={i}>
+                              {i} / {mission.maxCount}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {mission.bonus && (

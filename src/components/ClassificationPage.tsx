@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, Trophy, Medal, Award, RefreshCw } from 'lucide-react';
 import { Score } from '../App';
+import { supabase } from '../lib/supabase';
 
 interface ClassificationPageProps {
   scores: Score[];
@@ -24,41 +25,56 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
- const fetchGoogleSheetData = async () => {
-  try {
-    setLoading(true);
+  const fetchGoogleSheetData = async () => {
+    try {
+      setLoading(true);
 
-    const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbx97zrhJjtuQd4oA2JdOvSqhp_p2HhF09Q6_h1xgSK_cBd-ODdAIHVmJ2aA40UmrZcH2w/exec'
-    );
+      const { data: scoresData } = await supabase
+        .from('team_scores')
+        .select('*, teams(name, code)')
+        .order('round', { ascending: true });
 
-    const data = await response.json();
+      if (scoresData && scoresData.length > 0) {
+        const teamStatsMap = new Map();
 
-    if (data && Array.isArray(data)) {
+        scoresData.forEach((score: any) => {
+          const teamId = score.team_id;
+          const team = score.teams;
 
-      // 🔥 IMPORTANTE: Ignorar encabezados si existen
-      const formatted = data.slice(1).map((row: any[]) => ({
-  team: row[3],                 // ✅ EQUIPO (antes era row[2])
-  code: row[1],                 // CODIGO
-  bestScore: Number(row[5]),    // PUNTUACION
-  totalScore: Number(row[5]),
-  rounds: Number(row[4]),       // RONDA
-  averageScore: Number(row[5]),
-  averageEquipmentInspection: Number(row[6]),
-  bestRound: Number(row[4]),
-}));
+          if (!teamStatsMap.has(teamId)) {
+            teamStatsMap.set(teamId, {
+              team: team.name,
+              code: team.code,
+              bestScore: 0,
+              totalScore: 0,
+              rounds: 0,
+              averageScore: 0,
+              averageEquipmentInspection: 0,
+              bestRound: 0,
+            });
+          }
 
+          const stats = teamStatsMap.get(teamId);
+          stats.totalScore += score.score;
+          stats.rounds += 1;
+          stats.bestScore = Math.max(stats.bestScore, score.score);
+          stats.averageEquipmentInspection = ((stats.averageEquipmentInspection * (stats.rounds - 1)) + score.equipment_inspection) / stats.rounds;
 
-      setGoogleSheetData(formatted);
-      setLastUpdate(new Date());
+          if (score.score === stats.bestScore) {
+            stats.bestRound = score.round;
+          }
+        });
+
+        const formatted = Array.from(teamStatsMap.values());
+        setGoogleSheetData(formatted);
+        setLastUpdate(new Date());
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
     }
-
-  } catch (error) {
-    console.error('Error fetching Google Sheet data:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   useEffect(() => {

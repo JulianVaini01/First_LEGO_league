@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Save, AlertTriangle, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Save, AlertTriangle, Settings, AlertCircle } from 'lucide-react';
 import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
+import { getTeams, getTeamByCode, createTeam, saveTeamScore, Team } from '../lib/supabase';
 
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
@@ -123,13 +124,83 @@ const missions = [
 ];
 
 export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps) {
-  const [teamName, setTeamName] = useState('');
-  const [round, setRound] = useState(1);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [teamSearchInput, setTeamSearchInput] = useState('');
+  const [showTeamDropdown, setShowTeamDropdown] = useState(false);
+  const [codeInput, setCodeInput] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const [round, setRound] = useState(0);
   const [table, setTable] = useState('Mesa 1');
-  const [code, setCode] = useState('');
   const [missionScores, setMissionScores] = useState<Record<string, { completed: boolean; bonus: boolean; count: number }>>({});
   const [precisionTokens, setPrecisionTokens] = useState(6);
   const [equipmentInspection, setEquipmentInspection] = useState(false);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadTeams();
+  }, []);
+
+  const loadTeams = async () => {
+    setLoading(true);
+    const teamList = await getTeams();
+    setTeams(teamList);
+    setLoading(false);
+  };
+
+  const filteredTeams = teams.filter(t =>
+    t.name.toLowerCase().includes(teamSearchInput.toLowerCase()) ||
+    t.code.toLowerCase().includes(teamSearchInput.toLowerCase())
+  );
+
+  const handleSelectTeam = async (team: Team) => {
+    setSelectedTeam(team);
+    setTeamSearchInput(team.name);
+    setCodeInput(team.code);
+    setCodeError('');
+    setShowTeamDropdown(false);
+  };
+
+  const handleCodeChange = async (newCode: string) => {
+    setCodeInput(newCode);
+    setCodeError('');
+
+    if (newCode.trim() === '') {
+      setSelectedTeam(null);
+      return;
+    }
+
+    const team = await getTeamByCode(newCode.toUpperCase());
+    if (team) {
+      setSelectedTeam(team);
+      setTeamSearchInput(team.name);
+    } else {
+      setSelectedTeam(null);
+    }
+  };
+
+  const handleCreateTeam = async () => {
+    if (!teamSearchInput.trim() || !codeInput.trim()) {
+      alert('Por favor completa el nombre del equipo y el código');
+      return;
+    }
+
+    setIsCreatingTeam(true);
+    const newTeam = await createTeam(teamSearchInput, codeInput.toUpperCase());
+    if (newTeam) {
+      setSelectedTeam(newTeam);
+      setCodeInput(newTeam.code);
+      setCodeError('');
+      setTeamSearchInput(newTeam.name);
+      setShowTeamDropdown(false);
+      await loadTeams();
+      alert('Equipo creado exitosamente');
+    } else {
+      setCodeError('Error al crear el equipo. Verifica que el código sea único.');
+    }
+    setIsCreatingTeam(false);
+  };
 
   const handleMissionToggle = (missionId: string, type: 'completed' | 'bonus' = 'completed') => {
     setMissionScores(prev => ({
@@ -186,53 +257,56 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       default: return 0;
     }
   };
-  const handleSave = () => {
-    if (!teamName.trim() || !code.trim()) {
-      alert('Por favor completa el nombre del equipo y el código');
+  const handleSave = async () => {
+    if (!selectedTeam) {
+      alert('Por favor selecciona un equipo válido');
       return;
     }
 
     const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + (equipmentInspection ? 20 : 0);
+    const equipmentInspectionPoints = equipmentInspection ? 20 : 0;
 
-    // 🚀 Enviar los datos a Google Sheets
+    await saveTeamScore(
+      selectedTeam.id,
+      round,
+      table,
+      totalScore,
+      equipmentInspectionPoints,
+      getPrecisionTokenPoints(precisionTokens)
+    );
+
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
 
     const data = {
-      codigo: code || "",
-      mesa: table || "",
-      equipo: teamName || "",
-      ronda: round || "",
-      puntuacion: totalScore || 0,
-      equipmentInspection: equipmentInspection ? 20 : 0,
-      inspeccion_equipamiento: equipmentInspection ? 20 : 0,
+      codigo: selectedTeam.code,
+      mesa: table,
+      equipo: selectedTeam.name,
+      ronda: round,
+      puntuacion: totalScore,
+      equipmentInspection: equipmentInspectionPoints,
+      inspeccion_equipamiento: equipmentInspectionPoints,
     };
 
-    const sendToSheets = async () => {
-      try {
-        await fetch(SHEET_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-        console.log("✅ Datos enviados a Google Sheets correctamente");
-      } catch (error) {
-        console.error("❌ Error al enviar datos:", error);
-      }
-    };
-
-    // Ejecutar el envío a Google Sheets
-    sendToSheets();
+    try {
+      await fetch(SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error("Error al enviar datos:", error);
+    }
 
     const score: Omit<Score, 'id' | 'timestamp'> = {
-      code,
+      code: selectedTeam.code,
       table,
-      team: teamName,
+      team: selectedTeam.name,
       round,
       score: totalScore,
-      equipmentInspection: equipmentInspection ? 20 : 0,
+      equipmentInspection: equipmentInspectionPoints,
       missions: Object.keys(missionScores).reduce((acc, key) => {
         acc[key] = missionScores[key].completed;
         return acc;
@@ -240,7 +314,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       precisionTokens: getPrecisionTokenPoints(precisionTokens)
     };
 
-    // Mantener la funcionalidad original
     onAddScore(score);
     alert('Puntuación guardada exitosamente');
     onNavigate('display');
@@ -307,25 +380,62 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         {/* Team Info */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="grid md:grid-cols-4 gap-4">
-            <div>
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-2">Nombre del Equipo</label>
-              <input
-                type="text"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ingresa el nombre del equipo"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={teamSearchInput}
+                  onChange={(e) => {
+                    setTeamSearchInput(e.target.value);
+                    setShowTeamDropdown(true);
+                  }}
+                  onFocus={() => setShowTeamDropdown(true)}
+                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                  }`}
+                  placeholder="Buscar o crear equipo"
+                  disabled={loading}
+                />
+                {showTeamDropdown && teamSearchInput && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+                    {filteredTeams.map(team => (
+                      <button
+                        key={team.id}
+                        onClick={() => handleSelectTeam(team)}
+                        className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0"
+                      >
+                        <div className="font-semibold">{team.name}</div>
+                        <div className="text-xs text-gray-500">Código: {team.code}</div>
+                      </button>
+                    ))}
+                    {teamSearchInput && !filteredTeams.some(t => t.name.toLowerCase() === teamSearchInput.toLowerCase()) && (
+                      <button
+                        onClick={handleCreateTeam}
+                        disabled={isCreatingTeam}
+                        className="w-full text-left px-4 py-3 bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 border-t border-gray-300"
+                      >
+                        + Crear nuevo equipo
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              {selectedTeam && <p className="text-xs text-green-600 mt-1">Equipo seleccionado</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Código</label>
               <input
                 type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Código del equipo"
+                value={codeInput}
+                onChange={(e) => handleCodeChange(e.target.value.toUpperCase())}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
+                  selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                }`}
+                placeholder="Código único del equipo"
               />
+              {codeError && <p className="text-xs text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{codeError}</p>}
+              {selectedTeam && <p className="text-xs text-green-600 mt-1">Código válido</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Mesa</label>
@@ -346,6 +456,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 onChange={(e) => setRound(Number(e.target.value))}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
+                <option value={0}>Ronda 0</option>
                 <option value={1}>Ronda 1</option>
                 <option value={2}>Ronda 2</option>
                 <option value={3}>Ronda 3</option>

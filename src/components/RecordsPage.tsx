@@ -1,13 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, Users, Trophy, Target } from 'lucide-react';
 import { Score } from '../App';
+import { supabase, TeamScore, Team } from '../lib/supabase';
 
 interface RecordsPageProps {
   scores: Score[];
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
 }
 
+interface TeamScoreWithTeam extends TeamScore {
+  team?: Team;
+}
+
 export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
+  const [dbScores, setDbScores] = useState<TeamScoreWithTeam[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadScoresFromDB();
+  }, []);
+
+  const loadScoresFromDB = async () => {
+    setLoading(true);
+    const { data: scoresData, error: scoresError } = await supabase
+      .from('team_scores')
+      .select('*')
+      .order('round', { ascending: true });
+
+    if (!scoresError && scoresData) {
+      const { data: teamsData } = await supabase.from('teams').select('*');
+      const teamsMap = new Map(teamsData?.map(t => [t.id, t]) || []);
+
+      const scoresWithTeams = scoresData.map(score => ({
+        ...score,
+        team: teamsMap.get(score.team_id)
+      }));
+
+      setDbScores(scoresWithTeams);
+    }
+    setLoading(false);
+  };
+
+  const combinedScores = [...scores, ...dbScores.map(s => ({
+    id: s.id,
+    timestamp: new Date(s.created_at).toLocaleString('es-ES'),
+    code: s.team?.code || '',
+    table: s.table_name || '',
+    team: s.team?.name || '',
+    round: s.round,
+    score: s.score,
+    equipmentInspection: s.equipment_inspection,
+    missions: {},
+    precisionTokens: s.precision_tokens
+  } as Score))].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
   return (
     <div className="min-h-screen bg-gray-900 relative">
       {/* Background Image */}
@@ -59,7 +105,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
             </div>
             <div className="text-right">
               <p className="text-gray-300">Total de registros</p>
-              <p className="text-2xl font-bold text-white">{scores.length}</p>
+              <p className="text-2xl font-bold text-white">{combinedScores.length}</p>
             </div>
           </div>
         </div>
@@ -76,7 +122,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Puntuaciones Hoy</p>
-                <p className="text-2xl font-bold text-white">{scores.length}</p>
+                <p className="text-2xl font-bold text-white">{combinedScores.length}</p>
               </div>
             </div>
           </div>
@@ -89,7 +135,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
               <div>
                 <p className="text-gray-400 text-sm">Equipos Únicos</p>
                 <p className="text-2xl font-bold text-white">
-                  {new Set(scores.map(s => s.team)).size}
+                  {new Set(combinedScores.map(s => s.team)).size}
                 </p>
               </div>
             </div>
@@ -103,7 +149,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
               <div>
                 <p className="text-gray-400 text-sm">Mejor Puntuación</p>
                 <p className="text-2xl font-bold text-white">
-                  {scores.length > 0 ? Math.max(...scores.map(s => s.score)) : 0}
+                  {combinedScores.length > 0 ? Math.max(...combinedScores.map(s => s.score)) : 0}
                 </p>
               </div>
             </div>
@@ -117,7 +163,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
               <div>
                 <p className="text-gray-400 text-sm">Promedio</p>
                 <p className="text-2xl font-bold text-white">
-                  {scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b.score, 0) / scores.length) : 0}
+                  {combinedScores.length > 0 ? Math.round(combinedScores.reduce((a, b) => a + b.score, 0) / combinedScores.length) : 0}
                 </p>
               </div>
             </div>
@@ -134,7 +180,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
             </div>
           </div>
           
-          {scores.length === 0 ? (
+          {combinedScores.length === 0 ? (
             <div className="p-12 text-center">
               <div className="text-6xl mb-4">🏆</div>
               <p className="text-gray-400 text-lg">No hay registros de puntuación aún</p>
@@ -169,7 +215,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
-                  {scores.slice().reverse().map((score, index) => (
+                  {combinedScores.map((score, index) => (
                     <tr
                       key={score.id}
                       className={`hover:bg-gray-800/50 transition-colors ${

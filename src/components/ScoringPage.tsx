@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, AlertTriangle, Settings, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, AlertTriangle, Settings, AlertCircle, Trophy } from 'lucide-react';
 import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
-import { getTeams, getTeamByCode, saveTeamScore, Team } from '../lib/supabase';
+import { getTeams, getTeamByCode, saveTeamScore, Team, supabase } from '../lib/supabase';
 
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
@@ -136,16 +136,49 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [precisionTokens, setPrecisionTokens] = useState(6);
   const [equipmentInspection, setEquipmentInspection] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [teamScores, setTeamScores] = useState<any[]>([]);
+  const [topScores, setTopScores] = useState<any[]>([]);
 
   useEffect(() => {
     loadTeams();
+    loadTopScores();
   }, []);
+
+  useEffect(() => {
+    if (selectedTeam) {
+      loadTeamScores(selectedTeam.id);
+    }
+  }, [selectedTeam]);
 
   const loadTeams = async () => {
     setLoading(true);
     const teamList = await getTeams();
     setTeams(teamList);
     setLoading(false);
+  };
+
+  const loadTeamScores = async (teamId: string) => {
+    const { data } = await supabase
+      .from('team_scores')
+      .select('*')
+      .eq('team_id', teamId)
+      .order('round', { ascending: true });
+
+    if (data) {
+      setTeamScores(data);
+    }
+  };
+
+  const loadTopScores = async () => {
+    const { data } = await supabase
+      .from('team_scores')
+      .select('*, teams(name, code)')
+      .order('score', { ascending: false })
+      .limit(5);
+
+    if (data) {
+      setTopScores(data);
+    }
   };
 
   const filteredTeams = teams.filter(t =>
@@ -283,6 +316,13 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     }
 
     alert('Puntuación guardada exitosamente');
+
+    // Recargar puntuaciones
+    if (selectedTeam) {
+      await loadTeamScores(selectedTeam.id);
+    }
+    await loadTopScores();
+
     onNavigate('display');
   };
 
@@ -652,6 +692,98 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               <p className="text-2xl">{equipmentInspection ? 20 : 0}</p>
             </div>
           </div>
+        </div>
+
+        {/* Current Scores Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Team's Previous Scores */}
+          {selectedTeam && teamScores.length > 0 && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <Trophy className="h-6 w-6 text-blue-600 mr-2" />
+                Puntuaciones de {selectedTeam.name}
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ronda</th>
+                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Mesa</th>
+                      <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700">Puntos</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {teamScores.map((score, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm text-gray-700">Ronda {score.round}</td>
+                        <td className="px-4 py-2 text-sm text-gray-700">{score.table_name || 'N/A'}</td>
+                        <td className="px-4 py-2 text-right">
+                          <span className="text-lg font-bold text-blue-600">{score.score}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {teamScores.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-gray-700">Mejor Puntuación:</span>
+                    <span className="text-2xl font-bold text-green-600">
+                      {Math.max(...teamScores.map(s => s.score))}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm font-semibold text-gray-700">Promedio:</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      {Math.round(teamScores.reduce((acc, s) => acc + s.score, 0) / teamScores.length)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Top 5 Scores */}
+          {topScores.length > 0 && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <Trophy className="h-6 w-6 text-yellow-500 mr-2" />
+                Top 5 Mejores Puntuaciones
+              </h3>
+              <div className="space-y-3">
+                {topScores.map((score, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      index === 0 ? 'bg-yellow-50 border-2 border-yellow-300' :
+                      index === 1 ? 'bg-gray-50 border-2 border-gray-300' :
+                      index === 2 ? 'bg-orange-50 border-2 border-orange-300' :
+                      'bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                        index === 0 ? 'bg-yellow-500 text-white' :
+                        index === 1 ? 'bg-gray-400 text-white' :
+                        index === 2 ? 'bg-orange-500 text-white' :
+                        'bg-gray-300 text-gray-700'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">{score.teams?.name || 'N/A'}</p>
+                        <p className="text-xs text-gray-500">
+                          Ronda {score.round} - {score.table_name || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-2xl font-bold text-blue-600">{score.score}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -318,9 +318,6 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
                         Rondas
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Inspección Equipamiento
-                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800">
@@ -360,12 +357,6 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                           <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                             {team.rounds}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className={`w-4 h-4 rounded-full mr-2 ${team.averageEquipmentInspection > 0 ? 'bg-green-500' : 'bg-red-500'}`} />
-                            <span className="text-white font-semibold">{Math.round(team.averageEquipmentInspection)} pts</span>
-                          </div>
                         </td>
                       </tr>
                     ))}

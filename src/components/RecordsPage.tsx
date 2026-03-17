@@ -41,7 +41,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
     setLoading(false);
   };
 
-  const combinedScores = [...scores, ...dbScores.map(s => ({
+  const combinedScores = dbScores.map(s => ({
     id: s.id,
     timestamp: new Date(s.created_at).toLocaleString('es-ES'),
     code: s.team?.code || '',
@@ -52,7 +52,7 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
     equipmentInspection: s.equipment_inspection,
     missions: {},
     precisionTokens: s.precision_tokens
-  } as Score))].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  } as Score)).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 
   return (
     <div className="min-h-screen bg-gray-900 relative">

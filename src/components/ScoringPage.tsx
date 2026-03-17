@@ -282,21 +282,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       console.error("Error al enviar datos:", error);
     }
 
-    const score: Omit<Score, 'id' | 'timestamp'> = {
-      code: selectedTeam.code,
-      table,
-      team: selectedTeam.name,
-      round,
-      score: totalScore,
-      equipmentInspection: equipmentInspectionPoints,
-      missions: Object.keys(missionScores).reduce((acc, key) => {
-        acc[key] = missionScores[key].completed;
-        return acc;
-      }, {} as Record<string, boolean>),
-      precisionTokens: getPrecisionTokenPoints(precisionTokens)
-    };
-
-    onAddScore(score);
     alert('Puntuación guardada exitosamente');
     onNavigate('display');
   };

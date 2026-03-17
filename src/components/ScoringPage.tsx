@@ -167,15 +167,20 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
 
     if (newCode.trim() === '') {
       setSelectedTeam(null);
+      setTeamSearchInput('');
       return;
     }
 
-    const team = await getTeamByCode(newCode.toUpperCase());
-    if (team) {
-      setSelectedTeam(team);
-      setTeamSearchInput(team.name);
-    } else {
-      setSelectedTeam(null);
+    if (newCode.length >= 3) {
+      const team = await getTeamByCode(newCode.toUpperCase());
+      if (team) {
+        setSelectedTeam(team);
+        setTeamSearchInput(team.name);
+        setCodeError('');
+      } else {
+        setSelectedTeam(null);
+        setCodeError('Código no encontrado');
+      }
     }
   };
 
@@ -368,15 +373,20 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                     setShowTeamDropdown(true);
                   }}
                   onFocus={() => setShowTeamDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowTeamDropdown(false), 200)}
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                    selectedTeam ? 'border-green-400 bg-green-50' : 'border-gray-300'
                   }`}
-                  placeholder="Escribir o seleccionar equipo"
+                  placeholder="Buscar equipo por nombre"
                   disabled={loading}
                 />
                 {showTeamDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-                    {filteredTeams.length > 0 ? (
+                    {loading ? (
+                      <div className="px-4 py-3 text-center text-gray-500 text-sm">
+                        Cargando equipos...
+                      </div>
+                    ) : filteredTeams.length > 0 ? (
                       filteredTeams.map(team => (
                         <button
                           key={team.id}
@@ -395,7 +405,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   </div>
                 )}
               </div>
-              {selectedTeam && <p className="text-xs text-green-600 mt-1">Equipo seleccionado</p>}
+              {selectedTeam && <p className="text-xs text-green-600 mt-1">✓ Equipo seleccionado</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">código único del equipo</label>
@@ -406,11 +416,10 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
                   selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
                 }`}
-                placeholder="código único del equipo"
-                disabled
+                placeholder="Digitar código"
               />
               {codeError && <p className="text-xs text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{codeError}</p>}
-              {selectedTeam && <p className="text-xs text-green-600 mt-1">Código válido</p>}
+              {selectedTeam && <p className="text-xs text-green-600 mt-1">✓ Código válido</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Mesa</label>

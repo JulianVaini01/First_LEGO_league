@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, AlertTriangle, Settings, AlertCircle } from 'lucide-react';
 import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
-import { getTeams, getTeamByCode, createTeam, saveTeamScore, Team } from '../lib/supabase';
+import { getTeams, getTeamByCode, saveTeamScore, Team } from '../lib/supabase';
 
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
@@ -135,7 +135,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [missionScores, setMissionScores] = useState<Record<string, { completed: boolean; bonus: boolean; count: number }>>({});
   const [precisionTokens, setPrecisionTokens] = useState(6);
   const [equipmentInspection, setEquipmentInspection] = useState(false);
-  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -178,28 +177,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     } else {
       setSelectedTeam(null);
     }
-  };
-
-  const handleCreateTeam = async () => {
-    if (!teamSearchInput.trim() || !codeInput.trim()) {
-      alert('Por favor completa el nombre del equipo y el código');
-      return;
-    }
-
-    setIsCreatingTeam(true);
-    const newTeam = await createTeam(teamSearchInput, codeInput.toUpperCase());
-    if (newTeam) {
-      setSelectedTeam(newTeam);
-      setCodeInput(newTeam.code);
-      setCodeError('');
-      setTeamSearchInput(newTeam.name);
-      setShowTeamDropdown(false);
-      await loadTeams();
-      alert('Equipo creado exitosamente');
-    } else {
-      setCodeError('Error al crear el equipo. Verifica que el código sea único.');
-    }
-    setIsCreatingTeam(false);
   };
 
   const handleMissionToggle = (missionId: string, type: 'completed' | 'bonus' = 'completed') => {
@@ -394,29 +371,26 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
                   }`}
-                  placeholder="Buscar o crear equipo"
+                  placeholder="Escribir o seleccionar equipo"
                   disabled={loading}
                 />
-                {showTeamDropdown && teamSearchInput && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
-                    {filteredTeams.map(team => (
-                      <button
-                        key={team.id}
-                        onClick={() => handleSelectTeam(team)}
-                        className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0"
-                      >
-                        <div className="font-semibold">{team.name}</div>
-                        <div className="text-xs text-gray-500">Código: {team.code}</div>
-                      </button>
-                    ))}
-                    {teamSearchInput && !filteredTeams.some(t => t.name.toLowerCase() === teamSearchInput.toLowerCase()) && (
-                      <button
-                        onClick={handleCreateTeam}
-                        disabled={isCreatingTeam}
-                        className="w-full text-left px-4 py-3 bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 border-t border-gray-300"
-                      >
-                        + Crear nuevo equipo
-                      </button>
+                {showTeamDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                    {filteredTeams.length > 0 ? (
+                      filteredTeams.map(team => (
+                        <button
+                          key={team.id}
+                          onClick={() => handleSelectTeam(team)}
+                          className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0"
+                        >
+                          <div className="font-semibold">{team.name}</div>
+                          <div className="text-xs text-gray-500">Código: {team.code}</div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-center text-gray-500 text-sm">
+                        No se encontraron equipos
+                      </div>
                     )}
                   </div>
                 )}
@@ -424,7 +398,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               {selectedTeam && <p className="text-xs text-green-600 mt-1">Equipo seleccionado</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Código</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">código único del equipo</label>
               <input
                 type="text"
                 value={codeInput}
@@ -432,7 +406,8 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
                   selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
                 }`}
-                placeholder="Código único del equipo"
+                placeholder="código único del equipo"
+                disabled
               />
               {codeError && <p className="text-xs text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{codeError}</p>}
               {selectedTeam && <p className="text-xs text-green-600 mt-1">Código válido</p>}

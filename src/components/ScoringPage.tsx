@@ -544,14 +544,15 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                         <select
                           value={missionScores[mission.id]?.count || 0}
                           onChange={(e) => handleCountChange(mission.id, Number(e.target.value))}
-                          className="w-24 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                          className="w-16 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-center font-semibold"
                         >
                           {Array.from({ length: mission.maxCount + 1 }, (_, i) => (
                             <option key={i} value={i}>
-                              {i} / {mission.maxCount}
+                              {i}
                             </option>
                           ))}
                         </select>
+                        <span className="text-sm text-gray-500">/ {mission.maxCount}</span>
                       </div>
 
                       {mission.bonus && (

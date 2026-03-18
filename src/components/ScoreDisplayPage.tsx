@@ -16,6 +16,10 @@ interface TeamScore {
   round_count: number;
   best_score: number;
   rounds: Array<{ round: number; score: number }>;
+  round0?: number;
+  round1?: number;
+  round2?: number;
+  round3?: number;
 }
 
 export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPageProps) {
@@ -51,18 +55,35 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
             total_score: 0,
             round_count: 0,
             best_score: 0,
-            rounds: []
+            rounds: [],
+            round0: undefined,
+            round1: undefined,
+            round2: undefined,
+            round3: undefined,
           });
         }
 
         const teamData = teamMap.get(teamId)!;
         teamData.rounds.push({ round: score.round, score: score.score });
+
+        // Guardar puntaje por ronda específica
+        if (score.round === 0) teamData.round0 = score.score;
+        if (score.round === 1) teamData.round1 = score.score;
+        if (score.round === 2) teamData.round2 = score.score;
+        if (score.round === 3) teamData.round3 = score.score;
+
         teamData.round_count++;
-        teamData.best_score = Math.max(teamData.best_score, score.score);
+
+        // El mejor puntaje excluye la ronda 0
+        if (score.round !== 0) {
+          teamData.best_score = Math.max(teamData.best_score, score.score);
+        }
       });
 
       const teamsArray = Array.from(teamMap.values()).map(team => {
-        const sortedRounds = team.rounds.sort((a, b) => b.score - a.score);
+        // Filtrar solo las rondas oficiales (1, 2, 3) para el cálculo del total
+        const officialRounds = team.rounds.filter(r => r.round !== 0);
+        const sortedRounds = officialRounds.sort((a, b) => b.score - a.score);
         const topRounds = sortedRounds.slice(0, 3);
         team.total_score = topRounds.reduce((sum, round) => sum + round.score, 0);
         return team;
@@ -163,20 +184,19 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
                 <Trophy className="h-8 w-8 text-amber-400 mr-3" />
                 Clasificación General
               </h2>
-              <div className="text-sm text-gray-400">
-                Se suman las mejores 3 rondas de cada equipo
-              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b-2 border-amber-500/30">
-                    <th className="text-left py-4 px-4 text-amber-300 font-bold">Posición</th>
-                    <th className="text-left py-4 px-4 text-amber-300 font-bold">Código</th>
-                    <th className="text-left py-4 px-4 text-amber-300 font-bold">Equipo</th>
-                    <th className="text-center py-4 px-4 text-amber-300 font-bold">Rondas</th>
-                    <th className="text-center py-4 px-4 text-amber-300 font-bold">Mejor Ronda</th>
-                    <th className="text-right py-4 px-4 text-amber-300 font-bold">Total Acumulado</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Posición</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Código</th>
+                    <th className="text-left py-4 px-3 text-amber-300 font-bold">Equipo</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Ronda 0</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Ronda 1</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Ronda 2</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Ronda 3</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Mejor Ronda</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -187,20 +207,20 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
                         index < 3 ? 'bg-amber-500/10' : 'hover:bg-white/5'
                       }`}
                     >
-                      <td className="py-4 px-4">
-                        <div className="flex items-center">
+                      <td className="py-4 px-3 text-center">
+                        <div className="flex items-center justify-center">
                           {index === 0 && (
-                            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center mr-3">
+                            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center mr-2">
                               <Trophy className="h-6 w-6 text-white" />
                             </div>
                           )}
                           {index === 1 && (
-                            <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center mr-3">
+                            <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center mr-2">
                               <Trophy className="h-6 w-6 text-white" />
                             </div>
                           )}
                           {index === 2 && (
-                            <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center mr-3">
+                            <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center mr-2">
                               <Trophy className="h-6 w-6 text-white" />
                             </div>
                           )}
@@ -211,30 +231,37 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
                           </span>
                         </div>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-3 text-center">
                         <span className="text-gray-300 font-mono text-sm">{team.team_code}</span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-3">
                         <span className="text-white font-semibold text-lg">{team.team_name}</span>
                       </td>
-                      <td className="py-4 px-4 text-center">
-                        <span className="text-gray-300">{team.round_count}</span>
+                      <td className="py-4 px-3 text-center">
+                        <span className={`${team.round0 !== undefined ? 'text-gray-400 font-semibold' : 'text-gray-600'}`}>
+                          {team.round0 !== undefined ? team.round0 : '-'}
+                        </span>
                       </td>
-                      <td className="py-4 px-4 text-center">
+                      <td className="py-4 px-3 text-center">
+                        <span className={`${team.round1 !== undefined ? 'text-white font-semibold text-lg' : 'text-gray-600'}`}>
+                          {team.round1 !== undefined ? team.round1 : '-'}
+                        </span>
+                      </td>
+                      <td className="py-4 px-3 text-center">
+                        <span className={`${team.round2 !== undefined ? 'text-white font-semibold text-lg' : 'text-gray-600'}`}>
+                          {team.round2 !== undefined ? team.round2 : '-'}
+                        </span>
+                      </td>
+                      <td className="py-4 px-3 text-center">
+                        <span className={`${team.round3 !== undefined ? 'text-white font-semibold text-lg' : 'text-gray-600'}`}>
+                          {team.round3 !== undefined ? team.round3 : '-'}
+                        </span>
+                      </td>
+                      <td className="py-4 px-3 text-center">
                         <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30">
                           <TrendingUp className="h-4 w-4 text-green-400 mr-1" />
-                          <span className="text-green-400 font-bold">{team.best_score}</span>
+                          <span className="text-green-400 font-bold text-xl">{team.best_score}</span>
                         </div>
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <span className={`text-3xl font-bold ${
-                          index === 0 ? 'text-yellow-400' :
-                          index === 1 ? 'text-gray-400' :
-                          index === 2 ? 'text-orange-500' :
-                          'text-amber-400'
-                        }`}>
-                          {team.total_score}
-                        </span>
                       </td>
                     </tr>
                   ))}

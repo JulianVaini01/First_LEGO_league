@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, AlertTriangle, Settings, AlertCircle, Trophy } from 'lucide-react';
 import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
-import { getTeams, getTeamByCode, saveTeamScore, Team, supabase } from '../lib/supabase';
+import { getTeams, getTeamByCode, saveTeamScore, updateTeamCoreValues, Team, supabase } from '../lib/supabase';
 
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
@@ -135,6 +135,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [missionScores, setMissionScores] = useState<Record<string, { completed: boolean; bonus: boolean; count: number }>>({});
   const [precisionTokens, setPrecisionTokens] = useState(6);
   const [equipmentInspection, setEquipmentInspection] = useState(false);
+  const [coreValues, setCoreValues] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [teamScores, setTeamScores] = useState<any[]>([]);
   const [topScores, setTopScores] = useState<any[]>([]);
@@ -192,6 +193,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     setCodeInput(team.code);
     setCodeError('');
     setShowTeamDropdown(false);
+    setCoreValues(team.core_values || null);
   };
 
   const handleCodeChange = async (newCode: string) => {
@@ -210,6 +212,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         setSelectedTeam(team);
         setTeamSearchInput(team.name);
         setCodeError('');
+        setCoreValues(team.core_values || null);
       } else {
         setSelectedTeam(null);
         setCodeError('Código no encontrado');
@@ -289,6 +292,10 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       equipmentInspectionPoints,
       getPrecisionTokenPoints(precisionTokens)
     );
+
+    if (coreValues !== null) {
+      await updateTeamCoreValues(selectedTeam.id, coreValues);
+    }
 
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
 
@@ -372,13 +379,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 className="h-6 w-auto rounded px-1 py-0.5"
               />
             </div>
-            <button
-              onClick={handleSave}
-              className="bg-gradient-to-r from-red-500 to-blue-600 hover:from-red-600 hover:to-blue-700 px-6 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-            >
-              <Save className="h-5 w-5" />
-              <span>Generar</span>
-            </button>
           </div>
         </div>
       </div>
@@ -453,7 +453,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 onChange={(e) => setTable(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {Array.from({length: 8}, (_, i) => (
+                {Array.from({length: 6}, (_, i) => (
                   <option key={i} value={`Mesa ${i + 1}`}>Mesa {i + 1}</option>
                 ))}
               </select>
@@ -628,6 +628,70 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
           ))}
         </div>
 
+        {/* Core Values Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            ¿Qué tal fue el desempeño del equipo en Core Values?
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Esta evaluación no puntúa en el ranking general, solo se guarda para referencia.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button
+              onClick={() => setCoreValues(1)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                coreValues === 1
+                  ? 'bg-red-100 border-red-500 shadow-lg'
+                  : 'bg-gray-50 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-700">1</div>
+                <div className="text-sm font-medium mt-1">BÁSICO</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setCoreValues(2)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                coreValues === 2
+                  ? 'bg-yellow-100 border-yellow-500 shadow-lg'
+                  : 'bg-gray-50 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-700">2</div>
+                <div className="text-sm font-medium mt-1">EN DESARROLLO</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setCoreValues(3)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                coreValues === 3
+                  ? 'bg-green-100 border-green-500 shadow-lg'
+                  : 'bg-gray-50 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-700">3</div>
+                <div className="text-sm font-medium mt-1">CUMPLIDO</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setCoreValues(4)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                coreValues === 4
+                  ? 'bg-blue-100 border-blue-500 shadow-lg'
+                  : 'bg-gray-50 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-700">4</div>
+                <div className="text-sm font-medium mt-1">SUPERADO</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Bottom Section */}
         <div className="grid md:grid-cols-1 gap-6 mb-8">
           {/* Precision Tokens */}
@@ -668,6 +732,15 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                 <p>• 2 tokens: 15 puntos</p>
                 <p>• 1 token: 10 puntos</p>
               </div>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={handleSave}
+                  className="bg-gradient-to-r from-red-500 to-blue-600 hover:from-red-600 hover:to-blue-700 px-8 py-3 rounded-lg flex items-center space-x-2 transition-colors shadow-lg text-white font-semibold"
+                >
+                  <Save className="h-5 w-5" />
+                  <span>Enviar Puntaje</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -695,96 +768,52 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         </div>
 
         {/* Current Scores Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Team's Previous Scores */}
-          {selectedTeam && teamScores.length > 0 && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <Trophy className="h-6 w-6 text-blue-600 mr-2" />
-                Puntuaciones de {selectedTeam.name}
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ronda</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Mesa</th>
-                      <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700">Puntos</th>
+        {selectedTeam && teamScores.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <Trophy className="h-6 w-6 text-blue-600 mr-2" />
+              Puntuaciones de {selectedTeam.name}
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ronda</th>
+                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Mesa</th>
+                    <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700">Puntos</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {teamScores.map((score, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 text-sm text-gray-700">Ronda {score.round}</td>
+                      <td className="px-4 py-2 text-sm text-gray-700">{score.table_name || 'N/A'}</td>
+                      <td className="px-4 py-2 text-right">
+                        <span className="text-lg font-bold text-blue-600">{score.score}</span>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {teamScores.map((score, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 text-sm text-gray-700">Ronda {score.round}</td>
-                        <td className="px-4 py-2 text-sm text-gray-700">{score.table_name || 'N/A'}</td>
-                        <td className="px-4 py-2 text-right">
-                          <span className="text-lg font-bold text-blue-600">{score.score}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {teamScores.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-semibold text-gray-700">Mejor Puntuación:</span>
-                    <span className="text-2xl font-bold text-green-600">
-                      {Math.max(...teamScores.map(s => s.score))}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm font-semibold text-gray-700">Promedio:</span>
-                    <span className="text-lg font-bold text-blue-600">
-                      {Math.round(teamScores.reduce((acc, s) => acc + s.score, 0) / teamScores.length)}
-                    </span>
-                  </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {teamScores.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-700">Mejor Puntuación:</span>
+                  <span className="text-2xl font-bold text-green-600">
+                    {Math.max(...teamScores.map(s => s.score))}
+                  </span>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Top 5 Scores */}
-          {topScores.length > 0 && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <Trophy className="h-6 w-6 text-yellow-500 mr-2" />
-                Top 5 Mejores Puntuaciones
-              </h3>
-              <div className="space-y-3">
-                {topScores.map((score, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      index === 0 ? 'bg-yellow-50 border-2 border-yellow-300' :
-                      index === 1 ? 'bg-gray-50 border-2 border-gray-300' :
-                      index === 2 ? 'bg-orange-50 border-2 border-orange-300' :
-                      'bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        index === 0 ? 'bg-yellow-500 text-white' :
-                        index === 1 ? 'bg-gray-400 text-white' :
-                        index === 2 ? 'bg-orange-500 text-white' :
-                        'bg-gray-300 text-gray-700'
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-800">{score.teams?.name || 'N/A'}</p>
-                        <p className="text-xs text-gray-500">
-                          Ronda {score.round} - {score.table_name || 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-2xl font-bold text-blue-600">{score.score}</span>
-                  </div>
-                ))}
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-sm font-semibold text-gray-700">Promedio:</span>
+                  <span className="text-lg font-bold text-blue-600">
+                    {Math.round(teamScores.reduce((acc, s) => acc + s.score, 0) / teamScores.length)}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

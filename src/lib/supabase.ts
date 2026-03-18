@@ -9,6 +9,7 @@ export interface Team {
   id: string;
   name: string;
   code: string;
+  core_values?: number | null;
   created_at: string;
 }
 
@@ -105,4 +106,23 @@ export async function getTeamScores(teamId: string): Promise<TeamScore[]> {
   }
 
   return data || [];
+}
+
+export async function updateTeamCoreValues(
+  teamId: string,
+  coreValues: number
+): Promise<Team | null> {
+  const { data, error } = await supabase
+    .from('teams')
+    .update({ core_values: coreValues })
+    .eq('id', teamId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating core values:', error);
+    return null;
+  }
+
+  return data;
 }

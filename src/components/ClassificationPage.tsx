@@ -17,6 +17,10 @@ interface GoogleSheetTeam {
   averageScore: number;
   averageEquipmentInspection: number;
   bestRound: number;
+  round0?: number;
+  round1?: number;
+  round2?: number;
+  round3?: number;
   position?: number;
 }
 
@@ -38,9 +42,6 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
         const teamStatsMap = new Map();
 
         scoresData.forEach((score: any) => {
-          // Excluir Ronda 0 (ronda de prueba) de la clasificación
-          if (score.round === 0) return;
-
           const teamId = score.team_id;
           const team = score.teams;
 
@@ -54,23 +55,37 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
               averageScore: 0,
               averageEquipmentInspection: 0,
               bestRound: 0,
+              round0: undefined,
+              round1: undefined,
+              round2: undefined,
+              round3: undefined,
             });
           }
 
           const stats = teamStatsMap.get(teamId);
-          stats.totalScore += score.score;
-          stats.rounds += 1;
-          stats.bestScore = Math.max(stats.bestScore, score.score);
-          stats.averageEquipmentInspection = ((stats.averageEquipmentInspection * (stats.rounds - 1)) + score.equipment_inspection) / stats.rounds;
 
-          if (score.score === stats.bestScore) {
-            stats.bestRound = score.round;
+          // Guardar puntaje por ronda
+          if (score.round === 0) stats.round0 = score.score;
+          if (score.round === 1) stats.round1 = score.score;
+          if (score.round === 2) stats.round2 = score.score;
+          if (score.round === 3) stats.round3 = score.score;
+
+          // Excluir Ronda 0 de los cálculos de ranking
+          if (score.round !== 0) {
+            stats.totalScore += score.score;
+            stats.rounds += 1;
+            stats.bestScore = Math.max(stats.bestScore, score.score);
+            stats.averageEquipmentInspection = ((stats.averageEquipmentInspection * (stats.rounds - 1)) + score.equipment_inspection) / stats.rounds;
+
+            if (score.score === stats.bestScore) {
+              stats.bestRound = score.round;
+            }
           }
         });
 
         const formatted = Array.from(teamStatsMap.values()).map(team => ({
           ...team,
-          averageScore: team.totalScore / team.rounds
+          averageScore: team.rounds > 0 ? team.totalScore / team.rounds : 0
         }));
         setGoogleSheetData(formatted);
         setLastUpdate(new Date());
@@ -105,12 +120,13 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
       averageScore: number;
       averageEquipmentInspection: number;
       bestRound: number;
+      round0?: number;
+      round1?: number;
+      round2?: number;
+      round3?: number;
     }>();
 
     scores.forEach(score => {
-      // Excluir Ronda 0 (ronda de prueba) de la clasificación
-      if (score.round === 0) return;
-
       const existing = teamStats.get(score.team) || {
         team: score.team,
         code: score.code,
@@ -119,17 +135,30 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
         rounds: 0,
         averageScore: 0,
         averageEquipmentInspection: 0,
-        bestRound: 0
+        bestRound: 0,
+        round0: undefined,
+        round1: undefined,
+        round2: undefined,
+        round3: undefined,
       };
 
-      existing.totalScore += score.score;
-      existing.rounds += 1;
-      existing.bestScore = Math.max(existing.bestScore, score.score);
-      existing.averageScore = existing.totalScore / existing.rounds;
-      existing.averageEquipmentInspection = ((existing.averageEquipmentInspection * (existing.rounds - 1)) + score.equipmentInspection) / existing.rounds;
+      // Guardar puntaje por ronda
+      if (score.round === 0) existing.round0 = score.score;
+      if (score.round === 1) existing.round1 = score.score;
+      if (score.round === 2) existing.round2 = score.score;
+      if (score.round === 3) existing.round3 = score.score;
 
-      if (score.score === existing.bestScore) {
-        existing.bestRound = score.round;
+      // Excluir Ronda 0 de los cálculos de ranking
+      if (score.round !== 0) {
+        existing.totalScore += score.score;
+        existing.rounds += 1;
+        existing.bestScore = Math.max(existing.bestScore, score.score);
+        existing.averageScore = existing.totalScore / existing.rounds;
+        existing.averageEquipmentInspection = ((existing.averageEquipmentInspection * (existing.rounds - 1)) + score.equipmentInspection) / existing.rounds;
+
+        if (score.score === existing.bestScore) {
+          existing.bestRound = score.round;
+        }
       }
 
       teamStats.set(score.team, existing);
@@ -325,23 +354,29 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Pos
+                      <th className="px-4 py-4 text-center text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                        Posición
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Equipo
-                      </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                      <th className="px-4 py-4 text-center text-sm font-semibold text-gray-300 uppercase tracking-wider">
                         Código
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Mejor Puntuación
+                      <th className="px-4 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                        Equipo
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Promedio
+                      <th className="px-4 py-4 text-center text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                        Ronda 0
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Rondas
+                      <th className="px-4 py-4 text-center text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                        Ronda 1
+                      </th>
+                      <th className="px-4 py-4 text-center text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                        Ronda 2
+                      </th>
+                      <th className="px-4 py-4 text-center text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                        Ronda 3
+                      </th>
+                      <th className="px-4 py-4 text-center text-sm font-semibold text-yellow-400 uppercase tracking-wider">
+                        Mejor Ronda
                       </th>
                     </tr>
                   </thead>
@@ -353,35 +388,45 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                           index % 2 === 0 ? 'bg-gray-900/50' : 'bg-gray-800/30'
                         }`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-3">
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="flex items-center justify-center space-x-2">
                             {getPodiumIcon(team.position)}
                             <span className="text-white font-bold">{team.position}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-bold text-white text-lg">{team.team}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
                           <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                             {team.code}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <span className="text-3xl font-bold text-yellow-400">{team.bestScore}</span>
-                            <span className="text-gray-400 ml-2">pts</span>
-                            <span className="text-xs text-gray-500 ml-2">(R{team.bestRound})</span>
-                          </div>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="font-bold text-white text-lg">{team.team}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-green-400 font-semibold">{Math.round(team.averageScore)}</span>
-                          <span className="text-gray-500 ml-1">pts</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                            {team.rounds}
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <span className={`${team.round0 !== undefined ? 'text-gray-400 font-semibold' : 'text-gray-600'}`}>
+                            {team.round0 !== undefined ? team.round0 : '-'}
                           </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <span className={`${team.round1 !== undefined ? 'text-white font-semibold' : 'text-gray-600'}`}>
+                            {team.round1 !== undefined ? team.round1 : '-'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <span className={`${team.round2 !== undefined ? 'text-white font-semibold' : 'text-gray-600'}`}>
+                            {team.round2 !== undefined ? team.round2 : '-'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <span className={`${team.round3 !== undefined ? 'text-white font-semibold' : 'text-gray-600'}`}>
+                            {team.round3 !== undefined ? team.round3 : '-'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <div className="flex flex-col items-center">
+                            <span className="text-2xl font-bold text-yellow-400">{team.bestScore}</span>
+                            <span className="text-xs text-gray-500">(Ronda {team.bestRound})</span>
+                          </div>
                         </td>
                       </tr>
                     ))}

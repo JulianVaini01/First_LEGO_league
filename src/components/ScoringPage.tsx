@@ -176,29 +176,18 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       const response = await fetch(API_URL);
       const data = await response.json();
 
-      if (data && data.equipos && Array.isArray(data.equipos)) {
-        console.log('Equipos cargados desde Google Sheets:', data.equipos);
+      if (data && data.clasificacion && Array.isArray(data.clasificacion)) {
+        console.log('Equipos cargados desde Google Sheets clasificación:', data.clasificacion);
 
-        const clasificacionMap = new Map();
-        if (data.clasificacion && Array.isArray(data.clasificacion)) {
-          data.clasificacion.forEach((item: any) => {
-            clasificacionMap.set(item.equipo, item.codigo);
-          });
-        }
-
-        const teamsFromAPI = data.equipos.map((team: any) => {
-          const teamName = team.codigo || '';
-          const teamCode = clasificacionMap.get(teamName) || '';
-
-          return {
-            id: teamCode || teamName,
-            name: teamName,
-            code: teamCode,
-            core_values: null
-          };
-        });
+        const teamsFromAPI = data.clasificacion.map((team: any) => ({
+          id: team.codigo || '',
+          name: team.equipo || '',
+          code: team.codigo || '',
+          core_values: null
+        }));
 
         setTeams(teamsFromAPI);
+        console.log('Equipos procesados:', teamsFromAPI);
       } else {
         console.error('Formato de datos inválido:', data);
         setTeams([]);

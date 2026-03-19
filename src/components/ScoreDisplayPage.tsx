@@ -37,52 +37,64 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
   }, []);
 
   const loadTeamScores = async () => {
-    try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec');
-      if (!response.ok) return;
+    const { data: allScores } = await supabase
+      .from('team_scores')
+      .select('*, teams(name, code)')
+      .order('score', { ascending: false });
 
-      const data = await response.json();
+    if (allScores) {
+      const teamMap = new Map<string, TeamScore>();
 
-      if (data && data.clasificacion) {
-        const teams = data.clasificacion.map((team: any) => {
-          const rounds = [];
-          const roundScores = [team.ronda0, team.ronda1, team.ronda2, team.ronda3];
-
-          roundScores.forEach((score, index) => {
-            if (score > 0) {
-              rounds.push({ round: index, score });
-            }
+      allScores.forEach((score: any) => {
+        const teamId = score.team_id;
+        if (!teamMap.has(teamId)) {
+          teamMap.set(teamId, {
+            team_id: teamId,
+            team_name: score.teams?.name || 'N/A',
+            team_code: score.teams?.code || 'N/A',
+            total_score: 0,
+            round_count: 0,
+            best_score: 0,
+            rounds: [],
+            round0: undefined,
+            round1: undefined,
+            round2: undefined,
+            round3: undefined,
           });
+        }
 
-          const bestScore = Math.max(
-            team.ronda1 || 0,
-            team.ronda2 || 0,
-            team.ronda3 || 0
-          );
+        const teamData = teamMap.get(teamId)!;
+        teamData.rounds.push({ round: score.round, score: score.score });
 
-          return {
-            team_id: team.codigo,
-            team_name: team.equipo,
-            team_code: team.codigo,
-            total_score: (team.ronda1 || 0) + (team.ronda2 || 0) + (team.ronda3 || 0),
-            round_count: roundScores.filter(s => s > 0).length,
-            best_score: bestScore,
-            rounds: rounds,
-            round0: team.ronda0 || undefined,
-            round1: team.ronda1 || undefined,
-            round2: team.ronda2 || undefined,
-            round3: team.ronda3 || undefined,
-          };
-        });
+        // Guardar puntaje por ronda específica
+        if (score.round === 0) teamData.round0 = score.score;
+        if (score.round === 1) teamData.round1 = score.score;
+        if (score.round === 2) teamData.round2 = score.score;
+        if (score.round === 3) teamData.round3 = score.score;
 
-        teams.sort((a: TeamScore, b: TeamScore) => b.best_score - a.best_score);
-        setTeamScores(teams);
-      }
-    } catch (error) {
-      console.error('Error cargando puntajes:', error);
-    } finally {
-      setLoading(false);
+        teamData.round_count++;
+
+        // El mejor puntaje excluye la ronda 0
+        if (score.round !== 0) {
+          teamData.best_score = Math.max(teamData.best_score, score.score);
+        }
+      });
+
+      const teamsArray = Array.from(teamMap.values()).map(team => {
+        // Filtrar solo las rondas oficiales (1, 2, 3) para el cálculo del total
+        const officialRounds = team.rounds.filter(r => r.round !== 0);
+        const sortedRounds = officialRounds.sort((a, b) => b.score - a.score);
+        const topRounds = sortedRounds.slice(0, 3);
+        team.total_score = topRounds.reduce((sum, round) => sum + round.score, 0);
+        return team;
+      });
+
+      teamsArray.sort((a, b) => b.total_score - a.total_score);
+
+      setTeamScores(teamsArray);
     }
+
+    setLoading(false);
   };
 
   return (

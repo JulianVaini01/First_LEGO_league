@@ -214,9 +214,9 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     }
   }, [selectedTeam]);
 
-  const loadTeamsFromGoogleSheets = async () => {
+  const syncTeamsFromGoogleSheets = async () => {
     try {
-      console.log('Cargando equipos desde Google Sheets...');
+      console.log('Sincronizando equipos desde Google Sheets...');
       const response = await fetch(GOOGLE_SHEETS_API);
 
       if (!response.ok) {
@@ -226,58 +226,102 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       const data = await response.json();
       console.log('Datos recibidos de Google Sheets:', data);
 
-      const googleTeams: Array<{ name: string; code: string }> = [];
+      const googleTeams: Array<{ name: string; code: string; core_values?: number }> = [];
 
-      if (data && data.equipos && Array.isArray(data.equipos)) {
-        data.equipos.forEach((equipo: any) => {
-          let teamName = equipo.equipo || equipo.nombre || equipo.name || '';
-          let teamCode = equipo.codigo || equipo.code || '';
+      // Leer desde clasificacion
+      if (data && data.clasificacion && Array.isArray(data.clasificacion)) {
+        data.clasificacion.forEach((equipo: any) => {
+          const teamName = equipo.equipo || '';
+          const teamCode = equipo.codigo || '';
+          const coreValues = equipo.coreValues || equipo.core_values || null;
 
-          if (!teamName || teamName.trim() === '') {
-            teamName = teamCode;
-          }
-
-          if (teamName && teamName.trim()) {
-            const normalizedName = teamName.trim().toUpperCase();
-            let finalCode = teamCode.trim();
-
-            if (!finalCode || finalCode === teamName) {
-              finalCode = TEAM_CODES[normalizedName] || TEAM_CODES[teamName.trim()] || '';
-            }
-
-            if (finalCode) {
-              googleTeams.push({
-                name: teamName.trim(),
-                code: finalCode
-              });
-            }
+          if (teamName && teamCode) {
+            googleTeams.push({
+              name: teamName.trim(),
+              code: teamCode.trim(),
+              core_values: coreValues
+            });
           }
         });
       }
 
-      console.log('Equipos procesados:', googleTeams);
+      console.log('Equipos procesados desde Google Sheets:', googleTeams);
 
-      const teamsWithIds = googleTeams.map((team, index) => ({
-        id: team.code,
-        name: team.name,
-        code: team.code,
-        core_values: null
-      }));
+      // Sincronizar con Supabase
+      for (const gTeam of googleTeams) {
+        const { data: existing } = await supabase
+          .from('teams')
+          .select('id, core_values')
+          .eq('code', gTeam.code)
+          .maybeSingle();
 
-      setTeams(teamsWithIds);
-      console.log('Equipos cargados desde Google Sheets:', teamsWithIds);
-      return teamsWithIds;
+        if (existing) {
+          await supabase
+            .from('teams')
+            .update({
+              name: gTeam.name,
+              core_values: gTeam.core_values
+            })
+            .eq('code', gTeam.code);
+          console.log(`Equipo actualizado: ${gTeam.name} (${gTeam.code})`);
+        } else {
+          await supabase
+            .from('teams')
+            .insert({
+              name: gTeam.name,
+              code: gTeam.code,
+              core_values: gTeam.core_values
+            });
+          console.log(`Equipo agregado: ${gTeam.name} (${gTeam.code})`);
+        }
+      }
+
+      const googleCodes = googleTeams.map(t => t.code);
+      const { data: allTeams } = await supabase
+        .from('teams')
+        .select('id, code, name');
+
+      if (allTeams) {
+        for (const team of allTeams) {
+          if (!googleCodes.includes(team.code)) {
+            await supabase
+              .from('teams')
+              .delete()
+              .eq('id', team.id);
+            console.log(`Equipo eliminado: ${team.name} (${team.code})`);
+          }
+        }
+      }
+
+      console.log('Sincronización completada exitosamente');
     } catch (error) {
-      console.error('Error cargando equipos desde Google Sheets:', error);
-      setTeams([]);
-      return [];
+      console.error('Error sincronizando con Google Sheets:', error);
     }
   };
 
   const loadTeams = async () => {
     setLoading(true);
     try {
-      await loadTeamsFromGoogleSheets();
+      await syncTeamsFromGoogleSheets();
+
+      console.log('Cargando equipos desde Supabase...');
+      const { data, error } = await supabase
+        .from('teams')
+        .select('id, name, code, core_values')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error al cargar equipos de Supabase:', error);
+        setTeams([]);
+        return;
+      }
+
+      if (data && Array.isArray(data)) {
+        console.log('Equipos cargados:', data);
+        setTeams(data);
+      } else {
+        setTeams([]);
+      }
     } catch (error) {
       console.error('Error loading teams:', error);
       setTeams([]);
@@ -285,56 +329,27 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     setLoading(false);
   };
 
-  const loadTeamScores = async (teamCode: string) => {
-    try {
-      const response = await fetch(GOOGLE_SHEETS_API);
-      if (!response.ok) return;
+  const loadTeamScores = async (teamId: string) => {
+    const { data } = await supabase
+      .from('team_scores')
+      .select('*')
+      .eq('team_id', teamId)
+      .order('round', { ascending: true });
 
-      const data = await response.json();
-      if (data && data.clasificacion) {
-        const teamData = data.clasificacion.find((t: any) => t.codigo === teamCode);
-        if (teamData) {
-          const scores = [];
-          for (let i = 0; i < 4; i++) {
-            const roundKey = `ronda${i}` as const;
-            const score = teamData[roundKey];
-            if (score > 0) {
-              scores.push({
-                round: i,
-                score: score,
-                team_id: teamCode
-              });
-            }
-          }
-          setTeamScores(scores);
-        } else {
-          setTeamScores([]);
-        }
-      }
-    } catch (error) {
-      console.error('Error cargando puntajes:', error);
-      setTeamScores([]);
+    if (data) {
+      setTeamScores(data);
     }
   };
 
   const loadTopScores = async () => {
-    try {
-      const response = await fetch(GOOGLE_SHEETS_API);
-      if (!response.ok) return;
+    const { data } = await supabase
+      .from('team_scores')
+      .select('*, teams(name, code)')
+      .order('score', { ascending: false })
+      .limit(5);
 
-      const data = await response.json();
-      if (data && data.clasificacion) {
-        const top = data.clasificacion.slice(0, 5).map((team: any) => ({
-          score: team.mejorPuntuacion,
-          teams: {
-            name: team.equipo,
-            code: team.codigo
-          }
-        }));
-        setTopScores(top);
-      }
-    } catch (error) {
-      console.error('Error cargando top scores:', error);
+    if (data) {
+      setTopScores(data);
     }
   };
 
@@ -355,9 +370,9 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       setShowTeamDropdown(false);
       setCoreValues(team.core_values || null);
 
-      // Cargar puntajes previos del equipo desde Google Sheets
-      if (team.code) {
-        await loadTeamScores(team.code);
+      // Cargar puntajes previos del equipo
+      if (team.id) {
+        await loadTeamScores(team.id);
       }
     } catch (error) {
       console.error('Error al seleccionar equipo:', error);

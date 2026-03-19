@@ -1,24 +1,11 @@
-import React, { useState } from 'react';
-import { Trophy, CheckCircle, BarChart3, Zap, Upload } from 'lucide-react';
-import { loadAllTeamsToDatabase } from '../utils/loadAllTeams';
+import React from 'react';
+import { Trophy, CheckCircle, BarChart3, Zap } from 'lucide-react';
 
 interface HomePageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
 }
 
 export default function HomePage({ onNavigate }: HomePageProps) {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const handleLoadTeams = async () => {
-    setLoading(true);
-    setMessage('Cargando equipos...');
-    const result = await loadAllTeamsToDatabase();
-    setMessage(result.message);
-    setLoading(false);
-    setTimeout(() => setMessage(''), 3000);
-  };
-
   return (
     <div className="min-h-screen bg-gray-900 relative">
       {/* Background Image */}
@@ -146,23 +133,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 Mostrar puntuación actual
               </p>
             </button>
-          </div>
-
-          {/* Load Teams Button */}
-          <div className="text-center mt-12">
-            <button
-              onClick={handleLoadTeams}
-              disabled={loading}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center mx-auto"
-            >
-              <Upload className="h-6 w-6 mr-2" />
-              {loading ? 'Cargando...' : 'Cargar equipos en BD'}
-            </button>
-            {message && (
-              <div className={`mt-4 text-lg font-semibold ${message.includes('Error') ? 'text-red-400' : 'text-green-400'}`}>
-                {message}
-              </div>
-            )}
           </div>
 
           {/* Footer */}

@@ -263,12 +263,13 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         setTeamSearchInput(team.name || '');
         setCodeError('');
         setCoreValues(team.core_values || null);
+        // Cargar puntajes previos del equipo
         if (team.id) {
           await loadTeamScores(team.id);
         }
       } else {
         setSelectedTeam(null);
-        setCodeError('Código no encontrado. Por favor selecciona un equipo de la lista o carga los equipos desde la página principal.');
+        setCodeError('Código no encontrado');
       }
     }
   };
@@ -330,26 +331,36 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   };
   const handleSave = async () => {
     if (!selectedTeam) {
-      alert('Por favor selecciona un equipo válido de la lista');
+      alert('Por favor selecciona un equipo válido');
       return;
     }
 
     const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + (equipmentInspection ? 20 : 0);
     const equipmentInspectionPoints = equipmentInspection ? 20 : 0;
 
+    // Buscar o crear equipo en Supabase
     let teamId = selectedTeam.id;
 
+    // Verificar si el equipo existe en Supabase
     const { data: existingTeam } = await supabase
       .from('teams')
-      .select('id, name')
-      .eq('name', selectedTeam.name)
+      .select('id')
+      .eq('code', selectedTeam.code)
       .maybeSingle();
 
-    if (existingTeam) {
-      teamId = existingTeam.id;
+    if (!existingTeam) {
+      // Crear equipo en Supabase si no existe
+      const { data: newTeam } = await supabase
+        .from('teams')
+        .insert([{ name: selectedTeam.name, code: selectedTeam.code }])
+        .select('id')
+        .single();
+
+      if (newTeam) {
+        teamId = newTeam.id;
+      }
     } else {
-      alert('El equipo no existe en la base de datos. Por favor carga los equipos desde la página principal.');
-      return;
+      teamId = existingTeam.id;
     }
 
     await saveTeamScore(
@@ -365,9 +376,37 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       await updateTeamCoreValues(teamId, coreValues);
     }
 
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
+
+    const data = {
+      codigo: selectedTeam.code,
+      mesa: table,
+      equipo: selectedTeam.name,
+      ronda: round,
+      puntuacion: totalScore,
+      equipmentInspection: equipmentInspectionPoints,
+      inspeccion_equipamiento: equipmentInspectionPoints,
+    };
+
+    try {
+      await fetch(SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error("Error al enviar datos:", error);
+    }
+
     alert('Puntuación guardada exitosamente');
 
-    await loadTeamScores(teamId);
+    // Recargar puntuaciones
+    if (selectedTeam) {
+      await loadTeamScores(teamId);
+    }
     await loadTopScores();
 
     onNavigate('display');
@@ -493,7 +532,8 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                           }}
                           className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0 cursor-pointer transition-colors"
                         >
-                          <div className="font-medium text-gray-800">{team.name} - {team.code}</div>
+                          <div className="font-semibold text-gray-800">{team.name}</div>
+                          <div className="text-xs text-gray-500">Código: {team.code}</div>
                         </div>
                       ))
                     ) : (

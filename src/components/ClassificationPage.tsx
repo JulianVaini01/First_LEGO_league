@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { ArrowLeft, Trophy, Medal, Award, RefreshCw, Send } from 'lucide-react';
+import { ArrowLeft, Trophy, Medal, Award, RefreshCw } from 'lucide-react';
 import { Score } from '../App';
 import { supabase } from '../lib/supabase';
 
@@ -24,29 +24,53 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
   const [googleSheetData, setGoogleSheetData] = useState<GoogleSheetTeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [sending, setSending] = useState(false);
 
   const fetchGoogleSheetData = async () => {
     try {
       setLoading(true);
 
-      const API_URL = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
-      const response = await fetch(API_URL);
-      const data = await response.json();
+      const { data: scoresData } = await supabase
+        .from('team_scores')
+        .select('*, teams(name, code)')
+        .order('round', { ascending: true });
 
-      console.log('Data from Google Sheets:', data);
+      if (scoresData && scoresData.length > 0) {
+        const teamStatsMap = new Map();
 
-      if (data.clasificacion && Array.isArray(data.clasificacion)) {
-        const formatted = data.clasificacion.map((team: any, index: number) => ({
-          team: team.equipo || '',
-          code: team.codigo || '',
-          bestScore: team.mejorPuntaje || 0,
-          totalScore: team.mejorPuntaje || 0,
-          rounds: 3,
-          averageScore: team.mejorPuntaje || 0,
-          averageEquipmentInspection: 0,
-          bestRound: 1,
-          position: index + 1
+        scoresData.forEach((score: any) => {
+          // Excluir Ronda 0 (ronda de prueba) de la clasificación
+          if (score.round === 0) return;
+
+          const teamId = score.team_id;
+          const team = score.teams;
+
+          if (!teamStatsMap.has(teamId)) {
+            teamStatsMap.set(teamId, {
+              team: team.name,
+              code: team.code,
+              bestScore: 0,
+              totalScore: 0,
+              rounds: 0,
+              averageScore: 0,
+              averageEquipmentInspection: 0,
+              bestRound: 0,
+            });
+          }
+
+          const stats = teamStatsMap.get(teamId);
+          stats.totalScore += score.score;
+          stats.rounds += 1;
+          stats.bestScore = Math.max(stats.bestScore, score.score);
+          stats.averageEquipmentInspection = ((stats.averageEquipmentInspection * (stats.rounds - 1)) + score.equipment_inspection) / stats.rounds;
+
+          if (score.score === stats.bestScore) {
+            stats.bestRound = score.round;
+          }
+        });
+
+        const formatted = Array.from(teamStatsMap.values()).map(team => ({
+          ...team,
+          averageScore: team.totalScore / team.rounds
         }));
         setGoogleSheetData(formatted);
         setLastUpdate(new Date());
@@ -55,94 +79,6 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const sendToGoogleSheets = async () => {
-    try {
-      setSending(true);
-
-      const { data: scoresData } = await supabase
-        .from('team_scores')
-        .select('*, teams(name, code, core_values)')
-        .order('round', { ascending: true });
-
-      if (!scoresData || scoresData.length === 0) {
-        alert('No hay datos para enviar');
-        return;
-      }
-
-      const teamDataMap = new Map();
-
-      scoresData.forEach((score: any) => {
-        const teamId = score.team_id;
-        const team = score.teams;
-
-        if (!teamDataMap.has(teamId)) {
-          teamDataMap.set(teamId, {
-            team: team.name,
-            code: team.code,
-            coreValues: team.core_values || 0,
-            round0: 0,
-            round1: 0,
-            round2: 0,
-            round3: 0,
-            bestScore: 0,
-          });
-        }
-
-        const data = teamDataMap.get(teamId);
-
-        if (score.round === 0) data.round0 = Math.max(data.round0, score.score);
-        if (score.round === 1) data.round1 = Math.max(data.round1, score.score);
-        if (score.round === 2) data.round2 = Math.max(data.round2, score.score);
-        if (score.round === 3) data.round3 = Math.max(data.round3, score.score);
-
-        data.bestScore = Math.max(data.bestScore, score.score);
-      });
-
-      const sortedData = Array.from(teamDataMap.values())
-        .sort((a, b) => b.bestScore - a.bestScore)
-        .map((team, index) => ({
-          position: index + 1,
-          team: team.team,
-          code: team.code,
-          round0: team.round0,
-          round1: team.round1,
-          round2: team.round2,
-          round3: team.round3,
-          bestScore: team.bestScore,
-          coreValues: team.coreValues,
-        }));
-
-      console.log('Datos a enviar a Google Sheets:', sortedData);
-
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-to-sheets`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ scores: sortedData }),
-      });
-
-      console.log('Response status:', response.status);
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Response from Edge Function:', result);
-        alert('Datos enviados exitosamente a Google Sheets');
-      } else {
-        const error = await response.json();
-        console.error('Error response:', error);
-        alert('Error al enviar datos: ' + (error.error || 'Error desconocido'));
-      }
-    } catch (error) {
-      console.error('Error sending to sheets:', error);
-      alert('Error al enviar datos a Google Sheets');
-    } finally {
-      setSending(false);
     }
   };
 
@@ -278,23 +214,13 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                 )}
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={sendToGoogleSheets}
-                disabled={sending}
-                className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send className={`h-5 w-5 ${sending ? 'animate-pulse' : ''}`} />
-                <span className="hidden md:inline">{sending ? 'Enviando...' : 'Enviar a Sheets'}</span>
-              </button>
-              <button
-                onClick={fetchGoogleSheetData}
-                disabled={loading}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white disabled:opacity-50"
-              >
-                <RefreshCw className={`h-6 w-6 ${loading ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
+            <button
+              onClick={fetchGoogleSheetData}
+              disabled={loading}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white disabled:opacity-50"
+            >
+              <RefreshCw className={`h-6 w-6 ${loading ? 'animate-spin' : ''}`} />
+            </button>
             {/* Logos in top right */}
             <div className="hidden md:flex items-center space-x-4 mr-8">
               <img

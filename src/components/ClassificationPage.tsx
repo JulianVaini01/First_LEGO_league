@@ -30,57 +30,23 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
     try {
       setLoading(true);
 
-      const { data: scoresData } = await supabase
-        .from('team_scores')
-        .select('*, teams(name, code, core_values)')
-        .order('round', { ascending: true });
+      const API_URL = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
+      const response = await fetch(API_URL);
+      const data = await response.json();
 
-      if (scoresData && scoresData.length > 0) {
-        const teamStatsMap = new Map();
+      console.log('Data from Google Sheets:', data);
 
-        scoresData.forEach((score: any) => {
-          if (score.round === 0) return;
-
-          const teamId = score.team_id;
-          const team = score.teams;
-
-          if (!teamStatsMap.has(teamId)) {
-            teamStatsMap.set(teamId, {
-              team: team.name,
-              code: team.code,
-              coreValues: team.core_values,
-              bestScore: 0,
-              totalScore: 0,
-              rounds: 0,
-              averageScore: 0,
-              averageEquipmentInspection: 0,
-              bestRound: 0,
-              round0: 0,
-              round1: 0,
-              round2: 0,
-              round3: 0,
-            });
-          }
-
-          const stats = teamStatsMap.get(teamId);
-          stats.totalScore += score.score;
-          stats.rounds += 1;
-          stats.bestScore = Math.max(stats.bestScore, score.score);
-          stats.averageEquipmentInspection = ((stats.averageEquipmentInspection * (stats.rounds - 1)) + score.equipment_inspection) / stats.rounds;
-
-          if (score.round === 0) stats.round0 = Math.max(stats.round0, score.score);
-          if (score.round === 1) stats.round1 = Math.max(stats.round1, score.score);
-          if (score.round === 2) stats.round2 = Math.max(stats.round2, score.score);
-          if (score.round === 3) stats.round3 = Math.max(stats.round3, score.score);
-
-          if (score.score === stats.bestScore) {
-            stats.bestRound = score.round;
-          }
-        });
-
-        const formatted = Array.from(teamStatsMap.values()).map(team => ({
-          ...team,
-          averageScore: team.totalScore / team.rounds
+      if (data.clasificacion && Array.isArray(data.clasificacion)) {
+        const formatted = data.clasificacion.map((team: any, index: number) => ({
+          team: team.equipo || '',
+          code: team.codigo || '',
+          bestScore: team.mejorPuntaje || 0,
+          totalScore: team.mejorPuntaje || 0,
+          rounds: 3,
+          averageScore: team.mejorPuntaje || 0,
+          averageEquipmentInspection: 0,
+          bestRound: 1,
+          position: index + 1
         }));
         setGoogleSheetData(formatted);
         setLastUpdate(new Date());

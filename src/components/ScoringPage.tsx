@@ -263,13 +263,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         setTeamSearchInput(team.name || '');
         setCodeError('');
         setCoreValues(team.core_values || null);
-        // Cargar puntajes previos del equipo
         if (team.id) {
           await loadTeamScores(team.id);
         }
       } else {
         setSelectedTeam(null);
-        setCodeError('Código no encontrado');
+        setCodeError('Código no encontrado. Por favor selecciona un equipo de la lista o carga los equipos desde la página principal.');
       }
     }
   };
@@ -331,36 +330,26 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   };
   const handleSave = async () => {
     if (!selectedTeam) {
-      alert('Por favor selecciona un equipo válido');
+      alert('Por favor selecciona un equipo válido de la lista');
       return;
     }
 
     const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + (equipmentInspection ? 20 : 0);
     const equipmentInspectionPoints = equipmentInspection ? 20 : 0;
 
-    // Buscar o crear equipo en Supabase
     let teamId = selectedTeam.id;
 
-    // Verificar si el equipo existe en Supabase
     const { data: existingTeam } = await supabase
       .from('teams')
-      .select('id')
-      .eq('code', selectedTeam.code)
+      .select('id, name')
+      .eq('name', selectedTeam.name)
       .maybeSingle();
 
-    if (!existingTeam) {
-      // Crear equipo en Supabase si no existe
-      const { data: newTeam } = await supabase
-        .from('teams')
-        .insert([{ name: selectedTeam.name, code: selectedTeam.code }])
-        .select('id')
-        .single();
-
-      if (newTeam) {
-        teamId = newTeam.id;
-      }
-    } else {
+    if (existingTeam) {
       teamId = existingTeam.id;
+    } else {
+      alert('El equipo no existe en la base de datos. Por favor carga los equipos desde la página principal.');
+      return;
     }
 
     await saveTeamScore(
@@ -376,37 +365,9 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       await updateTeamCoreValues(teamId, coreValues);
     }
 
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
-
-    const data = {
-      codigo: selectedTeam.code,
-      mesa: table,
-      equipo: selectedTeam.name,
-      ronda: round,
-      puntuacion: totalScore,
-      equipmentInspection: equipmentInspectionPoints,
-      inspeccion_equipamiento: equipmentInspectionPoints,
-    };
-
-    try {
-      await fetch(SHEET_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-    } catch (error) {
-      console.error("Error al enviar datos:", error);
-    }
-
     alert('Puntuación guardada exitosamente');
 
-    // Recargar puntuaciones
-    if (selectedTeam) {
-      await loadTeamScores(teamId);
-    }
+    await loadTeamScores(teamId);
     await loadTopScores();
 
     onNavigate('display');

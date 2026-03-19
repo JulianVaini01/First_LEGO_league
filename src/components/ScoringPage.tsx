@@ -11,8 +11,6 @@ interface Team {
   core_values?: number | null;
 }
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
-
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
   onAddScore: (score: Omit<Score, 'id' | 'timestamp'>) => void;
@@ -172,32 +170,27 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const loadTeams = async () => {
     setLoading(true);
     try {
-      console.log('Cargando equipos desde API:', API_URL);
-      const response = await fetch(API_URL);
+      console.log('Cargando equipos desde Supabase...');
+      const { data, error } = await supabase
+        .from('teams')
+        .select('id, name, code, core_values')
+        .order('name', { ascending: true });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Error al cargar equipos de Supabase:', error);
+        setTeams([]);
+        return;
       }
 
-      const data = await response.json();
-      console.log('Datos recibidos de la API:', data);
-
-      if (data && data.equipos && Array.isArray(data.equipos)) {
-        const teamList: Team[] = data.equipos.map((equipo: any) => ({
-          id: equipo.codigo || equipo.id || equipo.code,
-          name: equipo.nombre || equipo.name,
-          code: equipo.codigo || equipo.code,
-          core_values: equipo.core_values || null
-        }));
-        console.log('Equipos procesados:', teamList);
-        setTeams(teamList);
+      if (data && Array.isArray(data)) {
+        console.log('Equipos cargados desde Supabase:', data);
+        setTeams(data);
       } else {
-        console.warn('Formato de datos inesperado:', data);
+        console.error('Formato de datos inválido:', data);
         setTeams([]);
       }
     } catch (error) {
-      console.error('Error loading teams from API:', error);
-      alert('Error al cargar equipos desde Google Sheets. Por favor verifica la conexión.');
+      console.error('Error loading teams:', error);
       setTeams([]);
     }
     setLoading(false);

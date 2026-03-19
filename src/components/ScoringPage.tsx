@@ -176,12 +176,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       const response = await fetch(API_URL);
       const data = await response.json();
 
-      if (data && Array.isArray(data)) {
-        console.log('Equipos cargados desde Google Sheets:', data);
-        const teamsFromAPI = data.map((team: any) => ({
-          id: team.codigo || team.code || '',
-          name: team.equipo || team.name || '',
-          code: team.codigo || team.code || '',
+      if (data && data.clasificacion && Array.isArray(data.clasificacion)) {
+        console.log('Equipos cargados desde Google Sheets:', data.clasificacion);
+        const teamsFromAPI = data.clasificacion.map((team: any) => ({
+          id: team.codigo || '',
+          name: team.equipo || '',
+          code: team.codigo || '',
           core_values: null
         }));
         setTeams(teamsFromAPI);

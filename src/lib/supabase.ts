@@ -24,49 +24,6 @@ export interface TeamScore {
   created_at: string;
 }
 
-export async function getTeams(): Promise<Team[]> {
-  const { data, error } = await supabase
-    .from('teams')
-    .select('*')
-    .order('name');
-
-  if (error) {
-    console.error('Error fetching teams:', error);
-    return [];
-  }
-
-  return data || [];
-}
-
-export async function getTeamByCode(code: string): Promise<Team | null> {
-  const { data, error } = await supabase
-    .from('teams')
-    .select('*')
-    .eq('code', code)
-    .maybeSingle();
-
-  if (error) {
-    console.error('Error fetching team:', error);
-    return null;
-  }
-
-  return data;
-}
-
-export async function createTeam(name: string, code: string): Promise<Team | null> {
-  const { data, error } = await supabase
-    .from('teams')
-    .insert([{ name, code }])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating team:', error);
-    return null;
-  }
-
-  return data;
-}
 
 export async function saveTeamScore(
   teamId: string,

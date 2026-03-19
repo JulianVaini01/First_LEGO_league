@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, AlertTriangle, Settings, AlertCircle, Trophy } from 'lucide-react';
 import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
-import { getTeams, getTeamByCode, saveTeamScore, updateTeamCoreValues, Team, supabase } from '../lib/supabase';
+import { saveTeamScore, updateTeamCoreValues, supabase } from '../lib/supabase';
+
+interface Team {
+  id: string;
+  name: string;
+  code: string;
+  core_values?: number | null;
+}
+
+const API_URL = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
 
 interface ScoringPageProps {
   onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
@@ -153,8 +162,23 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
 
   const loadTeams = async () => {
     setLoading(true);
-    const teamList = await getTeams();
-    setTeams(teamList);
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+
+      if (data && data.equipos) {
+        const teamList: Team[] = data.equipos.map((equipo: any) => ({
+          id: equipo.codigo || equipo.id,
+          name: equipo.nombre || equipo.name,
+          code: equipo.codigo || equipo.code,
+          core_values: equipo.core_values || null
+        }));
+        setTeams(teamList);
+      }
+    } catch (error) {
+      console.error('Error loading teams from API:', error);
+      setTeams([]);
+    }
     setLoading(false);
   };
 
@@ -207,7 +231,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     }
 
     if (newCode.length >= 3) {
-      const team = await getTeamByCode(newCode.toUpperCase());
+      const team = teams.find(t => t.code.toUpperCase() === newCode.toUpperCase());
       if (team) {
         setSelectedTeam(team);
         setTeamSearchInput(team.name);
@@ -284,8 +308,33 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     const totalScore = calculateTotal() + getPrecisionTokenPoints(precisionTokens) + (equipmentInspection ? 20 : 0);
     const equipmentInspectionPoints = equipmentInspection ? 20 : 0;
 
+    // Buscar o crear equipo en Supabase
+    let teamId = selectedTeam.id;
+
+    // Verificar si el equipo existe en Supabase
+    const { data: existingTeam } = await supabase
+      .from('teams')
+      .select('id')
+      .eq('code', selectedTeam.code)
+      .maybeSingle();
+
+    if (!existingTeam) {
+      // Crear equipo en Supabase si no existe
+      const { data: newTeam } = await supabase
+        .from('teams')
+        .insert([{ name: selectedTeam.name, code: selectedTeam.code }])
+        .select('id')
+        .single();
+
+      if (newTeam) {
+        teamId = newTeam.id;
+      }
+    } else {
+      teamId = existingTeam.id;
+    }
+
     await saveTeamScore(
-      selectedTeam.id,
+      teamId,
       round,
       table,
       totalScore,
@@ -294,7 +343,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     );
 
     if (coreValues !== null) {
-      await updateTeamCoreValues(selectedTeam.id, coreValues);
+      await updateTeamCoreValues(teamId, coreValues);
     }
 
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
@@ -326,7 +375,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
 
     // Recargar puntuaciones
     if (selectedTeam) {
-      await loadTeamScores(selectedTeam.id);
+      await loadTeamScores(teamId);
     }
     await loadTopScores();
 

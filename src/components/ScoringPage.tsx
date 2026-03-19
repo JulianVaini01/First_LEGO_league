@@ -235,12 +235,22 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   });
 
   const handleSelectTeam = async (team: Team) => {
-    setSelectedTeam(team);
-    setTeamSearchInput(team.name);
-    setCodeInput(team.code);
-    setCodeError('');
-    setShowTeamDropdown(false);
-    setCoreValues(team.core_values || null);
+    try {
+      console.log('Equipo seleccionado:', team);
+      setSelectedTeam(team);
+      setTeamSearchInput(team.name || '');
+      setCodeInput(team.code || '');
+      setCodeError('');
+      setShowTeamDropdown(false);
+      setCoreValues(team.core_values || null);
+
+      // Cargar puntajes previos del equipo
+      if (team.id) {
+        await loadTeamScores(team.id);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar equipo:', error);
+    }
   };
 
   const handleCodeChange = async (newCode: string) => {
@@ -254,12 +264,16 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     }
 
     if (newCode.length >= 3) {
-      const team = teams.find(t => t.code.toUpperCase() === newCode.toUpperCase());
+      const team = teams.find(t => (t.code || '').toUpperCase() === newCode.toUpperCase());
       if (team) {
         setSelectedTeam(team);
-        setTeamSearchInput(team.name);
+        setTeamSearchInput(team.name || '');
         setCodeError('');
         setCoreValues(team.core_values || null);
+        // Cargar puntajes previos del equipo
+        if (team.id) {
+          await loadTeamScores(team.id);
+        }
       } else {
         setSelectedTeam(null);
         setCodeError('Código no encontrado');
@@ -490,7 +504,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                     setShowTeamDropdown(true);
                   }}
                   onFocus={() => setShowTeamDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowTeamDropdown(false), 200)}
+                  onBlur={() => setTimeout(() => setShowTeamDropdown(false), 300)}
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     selectedTeam ? 'border-green-400 bg-green-50' : 'border-gray-300'
                   }`}
@@ -501,12 +515,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
                     {loading ? (
                       <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                        Cargando equipos desde Google Sheets...
+                        Cargando equipos desde Supabase...
                       </div>
                     ) : teams.length === 0 ? (
                       <div className="px-4 py-3 text-center text-gray-500 text-sm">
                         <div className="font-semibold text-red-600 mb-2">No se pudieron cargar los equipos</div>
-                        <div className="text-xs">Verifica la conexión a Google Sheets</div>
+                        <div className="text-xs">Verifica la conexión a Supabase</div>
                         <button
                           onClick={() => loadTeams()}
                           className="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
@@ -520,11 +534,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                           key={team.id}
                           onMouseDown={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             handleSelectTeam(team);
                           }}
-                          className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0 cursor-pointer"
+                          className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0 cursor-pointer transition-colors"
                         >
-                          <div className="font-semibold">{team.name}</div>
+                          <div className="font-semibold text-gray-800">{team.name}</div>
                           <div className="text-xs text-gray-500">Código: {team.code}</div>
                         </div>
                       ))

@@ -163,20 +163,32 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const loadTeams = async () => {
     setLoading(true);
     try {
+      console.log('Cargando equipos desde API:', API_URL);
       const response = await fetch(API_URL);
-      const data = await response.json();
 
-      if (data && data.equipos) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Datos recibidos de la API:', data);
+
+      if (data && data.equipos && Array.isArray(data.equipos)) {
         const teamList: Team[] = data.equipos.map((equipo: any) => ({
-          id: equipo.codigo || equipo.id,
+          id: equipo.codigo || equipo.id || equipo.code,
           name: equipo.nombre || equipo.name,
           code: equipo.codigo || equipo.code,
           core_values: equipo.core_values || null
         }));
+        console.log('Equipos procesados:', teamList);
         setTeams(teamList);
+      } else {
+        console.warn('Formato de datos inesperado:', data);
+        setTeams([]);
       }
     } catch (error) {
       console.error('Error loading teams from API:', error);
+      alert('Error al cargar equipos desde Google Sheets. Por favor verifica la conexión.');
       setTeams([]);
     }
     setLoading(false);
@@ -458,13 +470,27 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
                     {loading ? (
                       <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                        Cargando equipos...
+                        Cargando equipos desde Google Sheets...
+                      </div>
+                    ) : teams.length === 0 ? (
+                      <div className="px-4 py-3 text-center text-gray-500 text-sm">
+                        <div className="font-semibold text-red-600 mb-2">No se pudieron cargar los equipos</div>
+                        <div className="text-xs">Verifica la conexión a Google Sheets</div>
+                        <button
+                          onClick={() => loadTeams()}
+                          className="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                        >
+                          Reintentar
+                        </button>
                       </div>
                     ) : filteredTeams.length > 0 ? (
                       filteredTeams.map(team => (
                         <button
                           key={team.id}
-                          onClick={() => handleSelectTeam(team)}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleSelectTeam(team);
+                          }}
                           className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0"
                         >
                           <div className="font-semibold">{team.name}</div>
@@ -473,7 +499,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                       ))
                     ) : (
                       <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                        No se encontraron equipos
+                        No se encontraron equipos con "{teamSearchInput}"
                       </div>
                     )}
                   </div>

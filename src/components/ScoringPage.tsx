@@ -148,10 +148,19 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [loading, setLoading] = useState(true);
   const [teamScores, setTeamScores] = useState<any[]>([]);
   const [topScores, setTopScores] = useState<any[]>([]);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    loadTeams();
-    loadTopScores();
+    const initializeData = async () => {
+      try {
+        await loadTeams();
+        await loadTopScores();
+      } catch (error) {
+        console.error('Error initializing data:', error);
+        setHasError(true);
+      }
+    };
+    initializeData();
   }, []);
 
   useEffect(() => {
@@ -218,10 +227,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     }
   };
 
-  const filteredTeams = teams.filter(t =>
-    t.name.toLowerCase().includes(teamSearchInput.toLowerCase()) ||
-    t.code.toLowerCase().includes(teamSearchInput.toLowerCase())
-  );
+  const filteredTeams = teams.filter(t => {
+    const searchTerm = teamSearchInput.toLowerCase();
+    const teamName = (t.name || '').toLowerCase();
+    const teamCode = (t.code || '').toLowerCase();
+    return teamName.includes(searchTerm) || teamCode.includes(searchTerm);
+  });
 
   const handleSelectTeam = async (team: Team) => {
     setSelectedTeam(team);
@@ -394,6 +405,26 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     onNavigate('display');
   };
 
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md">
+          <div className="text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Error al cargar la página</h2>
+            <p className="text-gray-600 mb-4">Hubo un problema al inicializar los datos.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Recargar página
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 relative">
       {/* Background Image */}
@@ -485,17 +516,17 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                       </div>
                     ) : filteredTeams.length > 0 ? (
                       filteredTeams.map(team => (
-                        <button
+                        <div
                           key={team.id}
                           onMouseDown={(e) => {
                             e.preventDefault();
                             handleSelectTeam(team);
                           }}
-                          className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0"
+                          className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0 cursor-pointer"
                         >
                           <div className="font-semibold">{team.name}</div>
                           <div className="text-xs text-gray-500">Código: {team.code}</div>
-                        </button>
+                        </div>
                       ))
                     ) : (
                       <div className="px-4 py-3 text-center text-gray-500 text-sm">

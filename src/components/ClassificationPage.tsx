@@ -149,6 +149,8 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
           coreValues: team.coreValues,
         }));
 
+      console.log('Datos a enviar a Google Sheets:', sortedData);
+
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-to-sheets`;
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -159,10 +161,15 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
         body: JSON.stringify({ scores: sortedData }),
       });
 
+      console.log('Response status:', response.status);
+
       if (response.ok) {
+        const result = await response.json();
+        console.log('Response from Edge Function:', result);
         alert('Datos enviados exitosamente a Google Sheets');
       } else {
         const error = await response.json();
+        console.error('Error response:', error);
         alert('Error al enviar datos: ' + (error.error || 'Error desconocido'));
       }
     } catch (error) {

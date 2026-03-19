@@ -29,7 +29,10 @@ Deno.serve(async (req: Request) => {
   try {
     const { scores } = await req.json() as { scores: ScoreData[] };
 
+    console.log('Received scores:', scores);
+
     if (!scores || !Array.isArray(scores)) {
+      console.error('Invalid data format:', scores);
       return new Response(
         JSON.stringify({ error: "Invalid data format" }),
         {
@@ -45,16 +48,16 @@ Deno.serve(async (req: Request) => {
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
 
     const formattedScores = scores.map(score => ({
-      posicion: score.position,
-      equipo: score.team,
-      codigo: score.code,
-      ronda0: score.round0,
-      ronda1: score.round1,
-      ronda2: score.round2,
-      ronda3: score.round3,
-      mejorPuntaje: score.bestScore,
-      coreValues: score.coreValues || 0,
+      position: score.position,
+      round0: score.round0,
+      round1: score.round1,
+      round2: score.round2,
+      round3: score.round3,
+      bestScore: score.bestScore,
+      coreValues: score.coreValues || 0
     }));
+
+    console.log('Formatted scores to send:', formattedScores);
 
     const response = await fetch(SHEET_URL, {
       method: "POST",
@@ -64,7 +67,16 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({ scores: formattedScores }),
     });
 
-    const result = await response.text();
+    console.log('Google Sheets response status:', response.status);
+
+    let result;
+    try {
+      result = await response.text();
+      console.log('Google Sheets response:', result);
+    } catch (e) {
+      console.log('Could not read response text:', e);
+      result = "Success (no-cors)";
+    }
 
     return new Response(
       JSON.stringify({ success: true, result }),

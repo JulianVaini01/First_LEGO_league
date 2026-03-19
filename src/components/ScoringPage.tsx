@@ -4,6 +4,53 @@ import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
 import { saveTeamScore, updateTeamCoreValues, supabase } from '../lib/supabase';
 
+const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
+
+const TEAM_CODES: Record<string, string> = {
+  'CIBEROWLS': 'CBO01',
+  'CALIBOTS KAIROS': 'CBK02',
+  'ARQUEOBOTS': 'ARB03',
+  'ARQUEOMIND': 'ARM04',
+  'POWERLEGO': 'PWL05',
+  'FUTURETECH': 'FTT06',
+  'UNICO': 'UNI07',
+  'ROBOX': 'RBX08',
+  'FUN+QREATIVOS': 'FNQ09',
+  'MECHATITANS': 'MCT10',
+  'PHOENIX BOTS': 'PHB11',
+  'LEGO MONSTERS': 'LGM12',
+  'ENCA_STEAMCO': 'EST13',
+  'CRONOBOTS': 'CRB14',
+  'ARQUEOX': 'ARX15',
+  'CYBERNOVA': 'CBN16',
+  'ROBOT KINGS': 'RBK17',
+  'TECNO ANDES': 'TCA18',
+  'KING ROBOT': 'KRB19',
+  'REFOUSINNOVA': 'RFI20',
+  'JURASSIC BRICKS': 'JRB21',
+  'ROBOTGAME': 'RBG22',
+  'SAN RAFABOTS': 'SRB23',
+  'SKADI': 'SKD24',
+  'VI TECH': 'VIT25',
+  'LEGION CIBERNETICA': 'LGC26',
+  'ROFU': 'RFU27',
+  'STAR VI': 'STV28',
+  'TOTEM STEM': 'TTS29',
+  'M.A.B (MENTE A BLOQUES)': 'MAB30',
+  'ECO HACKERS': 'ECH31',
+  'ROSARIO': 'RSR32',
+  'CYBERLEGO': 'CBL33',
+  'ITAROBOT': 'ITR34',
+  'FIREBOTS': 'FRB35',
+  'LANCEROS CHALL': 'LNC36',
+  'IRON MACHINE': 'IRM37',
+  'APPLEBOTS': 'APB38',
+  'GIGOBOTS': 'GGB39',
+  'FRAY': 'FRY40',
+  'ROBOTSCHOOL': 'RBS41',
+  'BUMBLEBEE': 'BMB42'
+};
+
 interface Team {
   id: string;
   name: string;
@@ -167,9 +214,104 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     }
   }, [selectedTeam]);
 
+  const syncTeamsFromGoogleSheets = async () => {
+    try {
+      console.log('Sincronizando equipos desde Google Sheets...');
+      const response = await fetch(GOOGLE_SHEETS_API);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Datos recibidos de Google Sheets:', data);
+
+      const googleTeams: Array<{ name: string; code: string }> = [];
+
+      if (data && data.equipos && Array.isArray(data.equipos)) {
+        data.equipos.forEach((equipo: any) => {
+          let teamName = equipo.equipo || equipo.nombre || equipo.name || '';
+          let teamCode = equipo.codigo || equipo.code || '';
+
+          if (!teamName || teamName.trim() === '') {
+            teamName = teamCode;
+          }
+
+          if (teamName && teamName.trim()) {
+            const normalizedName = teamName.trim().toUpperCase();
+            let finalCode = teamCode.trim();
+
+            if (!finalCode || finalCode === teamName) {
+              finalCode = TEAM_CODES[normalizedName] || TEAM_CODES[teamName.trim()] || '';
+            }
+
+            if (finalCode) {
+              googleTeams.push({
+                name: teamName.trim(),
+                code: finalCode
+              });
+            }
+          }
+        });
+      }
+
+      console.log('Equipos procesados:', googleTeams);
+
+      if (googleTeams.length > 0) {
+        for (const gTeam of googleTeams) {
+          const { data: existing } = await supabase
+            .from('teams')
+            .select('id, core_values')
+            .eq('code', gTeam.code)
+            .maybeSingle();
+
+          if (existing) {
+            await supabase
+              .from('teams')
+              .update({ name: gTeam.name })
+              .eq('code', gTeam.code);
+            console.log(`Equipo actualizado: ${gTeam.name} (${gTeam.code})`);
+          } else {
+            await supabase
+              .from('teams')
+              .insert({
+                name: gTeam.name,
+                code: gTeam.code,
+                core_values: null
+              });
+            console.log(`Equipo agregado: ${gTeam.name} (${gTeam.code})`);
+          }
+        }
+
+        const googleCodes = googleTeams.map(t => t.code);
+        const { data: allTeams } = await supabase
+          .from('teams')
+          .select('id, code, name');
+
+        if (allTeams) {
+          for (const team of allTeams) {
+            if (!googleCodes.includes(team.code)) {
+              await supabase
+                .from('teams')
+                .delete()
+                .eq('id', team.id);
+              console.log(`Equipo eliminado: ${team.name} (${team.code})`);
+            }
+          }
+        }
+
+        console.log('Sincronización completada exitosamente');
+      }
+    } catch (error) {
+      console.error('Error sincronizando con Google Sheets:', error);
+    }
+  };
+
   const loadTeams = async () => {
     setLoading(true);
     try {
+      await syncTeamsFromGoogleSheets();
+
       console.log('Cargando equipos desde Supabase...');
       const { data, error } = await supabase
         .from('teams')

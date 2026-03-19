@@ -4,53 +4,6 @@ import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
 import { saveTeamScore, updateTeamCoreValues, supabase } from '../lib/supabase';
 
-const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
-
-const TEAM_CODES: Record<string, string> = {
-  'CIBEROWLS': 'CBO01',
-  'CALIBOTS KAIROS': 'CBK02',
-  'ARQUEOBOTS': 'ARB03',
-  'ARQUEOMIND': 'ARM04',
-  'POWERLEGO': 'PWL05',
-  'FUTURETECH': 'FTT06',
-  'UNICO': 'UNI07',
-  'ROBOX': 'RBX08',
-  'FUN+QREATIVOS': 'FNQ09',
-  'MECHATITANS': 'MCT10',
-  'PHOENIX BOTS': 'PHB11',
-  'LEGO MONSTERS': 'LGM12',
-  'ENCA_STEAMCO': 'EST13',
-  'CRONOBOTS': 'CRB14',
-  'ARQUEOX': 'ARX15',
-  'CYBERNOVA': 'CBN16',
-  'ROBOT KINGS': 'RBK17',
-  'TECNO ANDES': 'TCA18',
-  'KING ROBOT': 'KRB19',
-  'REFOUSINNOVA': 'RFI20',
-  'JURASSIC BRICKS': 'JRB21',
-  'ROBOTGAME': 'RBG22',
-  'SAN RAFABOTS': 'SRB23',
-  'SKADI': 'SKD24',
-  'VI TECH': 'VIT25',
-  'LEGION CIBERNETICA': 'LGC26',
-  'ROFU': 'RFU27',
-  'STAR VI': 'STV28',
-  'TOTEM STEM': 'TTS29',
-  'M.A.B (MENTE A BLOQUES)': 'MAB30',
-  'ECO HACKERS': 'ECH31',
-  'ROSARIO': 'RSR32',
-  'CYBERLEGO': 'CBL33',
-  'ITAROBOT': 'ITR34',
-  'FIREBOTS': 'FRB35',
-  'LANCEROS CHALL': 'LNC36',
-  'IRON MACHINE': 'IRM37',
-  'APPLEBOTS': 'APB38',
-  'GIGOBOTS': 'GGB39',
-  'FRAY': 'FRY40',
-  'ROBOTSCHOOL': 'RBS41',
-  'BUMBLEBEE': 'BMB42'
-};
-
 interface Team {
   id: string;
   name: string;
@@ -217,55 +170,27 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const loadTeams = async () => {
     setLoading(true);
     try {
-      console.log('Cargando equipos desde Google Sheets...');
-      const response = await fetch(GOOGLE_SHEETS_API);
+      console.log('Cargando equipos desde Supabase...');
+      const { data, error } = await supabase
+        .from('teams')
+        .select('id, name, code, core_values')
+        .order('name', { ascending: true });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Error al cargar equipos de Supabase:', error);
+        setTeams([]);
+        return;
       }
 
-      const data = await response.json();
-      console.log('Datos recibidos de Google Sheets:', data);
-
-      const googleTeams: Team[] = [];
-
-      // Leer desde equipos (listado de equipos)
-      if (data && data.equipos && Array.isArray(data.equipos)) {
-        data.equipos.forEach((equipo: any, index: number) => {
-          const teamCode = equipo.codigo || '';
-
-          if (teamCode.trim()) {
-            googleTeams.push({
-              id: `gs-${index}`,
-              name: teamCode.trim(),
-              code: teamCode.trim(),
-              core_values: null
-            });
-          }
-        });
+      if (data && Array.isArray(data)) {
+        console.log('Equipos cargados desde Supabase:', data);
+        setTeams(data);
+      } else {
+        console.error('Formato de datos inválido:', data);
+        setTeams([]);
       }
-
-      // Si no hay equipos en el array 'equipos', usar clasificacion como respaldo
-      if (googleTeams.length === 0 && data && data.clasificacion && Array.isArray(data.clasificacion)) {
-        data.clasificacion.forEach((equipo: any, index: number) => {
-          const teamName = equipo.equipo || '';
-          const teamCode = equipo.codigo || '';
-
-          if (teamCode.trim()) {
-            googleTeams.push({
-              id: `gs-${index}`,
-              name: teamName.trim() || teamCode.trim(),
-              code: teamCode.trim(),
-              core_values: null
-            });
-          }
-        });
-      }
-
-      console.log('Equipos cargados desde Google Sheets:', googleTeams);
-      setTeams(googleTeams);
     } catch (error) {
-      console.error('Error loading teams from Google Sheets:', error);
+      console.error('Error loading teams:', error);
       setTeams([]);
     }
     setLoading(false);
@@ -461,7 +386,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       puntuacion: totalScore,
       equipmentInspection: equipmentInspectionPoints,
       inspeccion_equipamiento: equipmentInspectionPoints,
-      coreValues: coreValues,
     };
 
     try {

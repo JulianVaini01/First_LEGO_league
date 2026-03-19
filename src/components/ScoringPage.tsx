@@ -231,11 +231,16 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       // Leer desde clasificacion
       if (data && data.clasificacion && Array.isArray(data.clasificacion)) {
         data.clasificacion.forEach((equipo: any) => {
-          const teamName = equipo.equipo || '';
+          let teamName = equipo.equipo || '';
           const teamCode = equipo.codigo || '';
           const coreValues = equipo.coreValues || equipo.core_values || null;
 
-          if (teamName && teamCode) {
+          // Si el nombre está vacío, usar el código como nombre
+          if (!teamName.trim() && teamCode) {
+            teamName = teamCode;
+          }
+
+          if (teamName.trim() && teamCode.trim()) {
             googleTeams.push({
               name: teamName.trim(),
               code: teamCode.trim(),

@@ -4,8 +4,6 @@ import { Score } from '../App';
 import noEquipmentImg from '../assets/no-equipment.png';
 import { saveTeamScore, updateTeamCoreValues, supabase } from '../lib/supabase';
 
-const GOOGLE_SHEETS_API = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
-
 interface Team {
   id: string;
   name: string;
@@ -169,76 +167,9 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
     }
   }, [selectedTeam]);
 
-  const syncTeamsFromGoogleSheets = async () => {
-    try {
-      console.log('Sincronizando equipos desde Google Sheets...');
-      const response = await fetch(GOOGLE_SHEETS_API);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Datos de Google Sheets:', data);
-
-      if (data && data.equipos && Array.isArray(data.equipos)) {
-        const googleTeams = data.equipos.map((equipo: any) => ({
-          name: equipo.nombre || equipo.name,
-          code: equipo.codigo || equipo.code,
-        }));
-
-        for (const gTeam of googleTeams) {
-          const { data: existing } = await supabase
-            .from('teams')
-            .select('id, core_values')
-            .eq('code', gTeam.code)
-            .maybeSingle();
-
-          if (existing) {
-            await supabase
-              .from('teams')
-              .update({ name: gTeam.name })
-              .eq('code', gTeam.code);
-          } else {
-            await supabase
-              .from('teams')
-              .insert({
-                name: gTeam.name,
-                code: gTeam.code,
-                core_values: null
-              });
-          }
-        }
-
-        const googleCodes = googleTeams.map((t: any) => t.code);
-        const { data: allTeams } = await supabase
-          .from('teams')
-          .select('id, code');
-
-        if (allTeams) {
-          for (const team of allTeams) {
-            if (!googleCodes.includes(team.code)) {
-              await supabase
-                .from('teams')
-                .delete()
-                .eq('id', team.id);
-              console.log(`Equipo eliminado: ${team.code}`);
-            }
-          }
-        }
-
-        console.log('Sincronización completada');
-      }
-    } catch (error) {
-      console.error('Error sincronizando con Google Sheets:', error);
-    }
-  };
-
   const loadTeams = async () => {
     setLoading(true);
     try {
-      await syncTeamsFromGoogleSheets();
-
       console.log('Cargando equipos desde Supabase...');
       const { data, error } = await supabase
         .from('teams')

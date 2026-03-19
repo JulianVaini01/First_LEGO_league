@@ -257,51 +257,49 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
 
       console.log('Equipos procesados:', googleTeams);
 
-      if (googleTeams.length > 0) {
-        for (const gTeam of googleTeams) {
-          const { data: existing } = await supabase
-            .from('teams')
-            .select('id, core_values')
-            .eq('code', gTeam.code)
-            .maybeSingle();
-
-          if (existing) {
-            await supabase
-              .from('teams')
-              .update({ name: gTeam.name })
-              .eq('code', gTeam.code);
-            console.log(`Equipo actualizado: ${gTeam.name} (${gTeam.code})`);
-          } else {
-            await supabase
-              .from('teams')
-              .insert({
-                name: gTeam.name,
-                code: gTeam.code,
-                core_values: null
-              });
-            console.log(`Equipo agregado: ${gTeam.name} (${gTeam.code})`);
-          }
-        }
-
-        const googleCodes = googleTeams.map(t => t.code);
-        const { data: allTeams } = await supabase
+      for (const gTeam of googleTeams) {
+        const { data: existing } = await supabase
           .from('teams')
-          .select('id, code, name');
+          .select('id, core_values')
+          .eq('code', gTeam.code)
+          .maybeSingle();
 
-        if (allTeams) {
-          for (const team of allTeams) {
-            if (!googleCodes.includes(team.code)) {
-              await supabase
-                .from('teams')
-                .delete()
-                .eq('id', team.id);
-              console.log(`Equipo eliminado: ${team.name} (${team.code})`);
-            }
+        if (existing) {
+          await supabase
+            .from('teams')
+            .update({ name: gTeam.name })
+            .eq('code', gTeam.code);
+          console.log(`Equipo actualizado: ${gTeam.name} (${gTeam.code})`);
+        } else {
+          await supabase
+            .from('teams')
+            .insert({
+              name: gTeam.name,
+              code: gTeam.code,
+              core_values: null
+            });
+          console.log(`Equipo agregado: ${gTeam.name} (${gTeam.code})`);
+        }
+      }
+
+      const googleCodes = googleTeams.map(t => t.code);
+      const { data: allTeams } = await supabase
+        .from('teams')
+        .select('id, code, name');
+
+      if (allTeams) {
+        for (const team of allTeams) {
+          if (!googleCodes.includes(team.code)) {
+            await supabase
+              .from('teams')
+              .delete()
+              .eq('id', team.id);
+            console.log(`Equipo eliminado: ${team.name} (${team.code})`);
           }
         }
-
-        console.log('Sincronización completada exitosamente');
       }
+
+      console.log('Sincronización completada exitosamente');
     } catch (error) {
       console.error('Error sincronizando con Google Sheets:', error);
     }

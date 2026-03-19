@@ -29,51 +29,34 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
     try {
       setLoading(true);
 
-      const { data: scoresData } = await supabase
-        .from('team_scores')
-        .select('*, teams(name, code)')
-        .order('round', { ascending: true });
+      const response = await fetch('https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec');
+      if (!response.ok) {
+        throw new Error('Error al cargar datos');
+      }
 
-      if (scoresData && scoresData.length > 0) {
-        const teamStatsMap = new Map();
+      const data = await response.json();
 
-        scoresData.forEach((score: any) => {
-          // Excluir Ronda 0 (ronda de prueba) de la clasificación
-          if (score.round === 0) return;
+      if (data && data.clasificacion && data.clasificacion.length > 0) {
+        const teams = data.clasificacion.map((team: any, index: number) => ({
+          team: team.equipo,
+          code: team.codigo,
+          bestScore: team.mejorPuntuacion,
+          totalScore: (team.ronda1 || 0) + (team.ronda2 || 0) + (team.ronda3 || 0),
+          rounds: [team.ronda1, team.ronda2, team.ronda3].filter(r => r > 0).length,
+          averageScore: 0,
+          averageEquipmentInspection: 0,
+          bestRound: Math.max(team.ronda1 || 0, team.ronda2 || 0, team.ronda3 || 0),
+          position: index + 1
+        }));
 
-          const teamId = score.team_id;
-          const team = score.teams;
-
-          if (!teamStatsMap.has(teamId)) {
-            teamStatsMap.set(teamId, {
-              team: team.name,
-              code: team.code,
-              bestScore: 0,
-              totalScore: 0,
-              rounds: 0,
-              averageScore: 0,
-              averageEquipmentInspection: 0,
-              bestRound: 0,
-            });
-          }
-
-          const stats = teamStatsMap.get(teamId);
-          stats.totalScore += score.score;
-          stats.rounds += 1;
-          stats.bestScore = Math.max(stats.bestScore, score.score);
-          stats.averageEquipmentInspection = ((stats.averageEquipmentInspection * (stats.rounds - 1)) + score.equipment_inspection) / stats.rounds;
-
-          if (score.score === stats.bestScore) {
-            stats.bestRound = score.round;
-          }
+        teams.forEach((team: GoogleSheetTeam) => {
+          team.averageScore = team.rounds > 0 ? team.totalScore / team.rounds : 0;
         });
 
-        const formatted = Array.from(teamStatsMap.values()).map(team => ({
-          ...team,
-          averageScore: team.totalScore / team.rounds
-        }));
-        setGoogleSheetData(formatted);
+        setGoogleSheetData(teams);
         setLastUpdate(new Date());
+      } else {
+        setGoogleSheetData([]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);

@@ -22,23 +22,52 @@ export default function RecordsPage({ scores, onNavigate }: RecordsPageProps) {
 
   const loadScoresFromDB = async () => {
     setLoading(true);
-    const { data: scoresData, error: scoresError } = await supabase
-      .from('team_scores')
-      .select('*')
-      .order('round', { ascending: true });
+    try {
+      const response = await fetch('https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec');
+      if (!response.ok) return;
 
-    if (!scoresError && scoresData) {
-      const { data: teamsData } = await supabase.from('teams').select('*');
-      const teamsMap = new Map(teamsData?.map(t => [t.id, t]) || []);
+      const data = await response.json();
+      if (data && data.clasificacion) {
+        const allScores: TeamScoreWithTeam[] = [];
 
-      const scoresWithTeams = scoresData.map(score => ({
-        ...score,
-        team: teamsMap.get(score.team_id)
-      }));
+        data.clasificacion.forEach((team: any) => {
+          const rounds = [
+            { round: 0, score: team.ronda0 },
+            { round: 1, score: team.ronda1 },
+            { round: 2, score: team.ronda2 },
+            { round: 3, score: team.ronda3 }
+          ];
 
-      setDbScores(scoresWithTeams);
+          rounds.forEach(({ round, score }) => {
+            if (score > 0) {
+              allScores.push({
+                id: `${team.codigo}-r${round}`,
+                team_id: team.codigo,
+                round: round,
+                score: score,
+                equipment_inspection: 0,
+                precision_tokens: 0,
+                table_name: '',
+                created_at: new Date().toISOString(),
+                team: {
+                  id: team.codigo,
+                  code: team.codigo,
+                  name: team.equipo,
+                  core_values: null
+                }
+              });
+            }
+          });
+        });
+
+        allScores.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setDbScores(allScores);
+      }
+    } catch (error) {
+      console.error('Error cargando registros:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const combinedScores = dbScores.map(s => ({

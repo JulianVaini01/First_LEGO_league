@@ -170,27 +170,27 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const loadTeams = async () => {
     setLoading(true);
     try {
-      console.log('Cargando equipos desde Supabase...');
-      const { data, error } = await supabase
-        .from('teams')
-        .select('id, name, code, core_values')
-        .order('name', { ascending: true });
+      const API_URL = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
+      console.log('Cargando equipos desde Google Sheets...');
 
-      if (error) {
-        console.error('Error al cargar equipos de Supabase:', error);
-        setTeams([]);
-        return;
-      }
+      const response = await fetch(API_URL);
+      const data = await response.json();
 
       if (data && Array.isArray(data)) {
-        console.log('Equipos cargados desde Supabase:', data);
-        setTeams(data);
+        console.log('Equipos cargados desde Google Sheets:', data);
+        const teamsFromAPI = data.map((team: any) => ({
+          id: team.codigo || team.code || '',
+          name: team.equipo || team.name || '',
+          code: team.codigo || team.code || '',
+          core_values: null
+        }));
+        setTeams(teamsFromAPI);
       } else {
         console.error('Formato de datos inválido:', data);
         setTeams([]);
       }
     } catch (error) {
-      console.error('Error loading teams:', error);
+      console.error('Error loading teams from Google Sheets:', error);
       setTeams([]);
     }
     setLoading(false);
@@ -508,12 +508,12 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
                     {loading ? (
                       <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                        Cargando equipos desde Supabase...
+                        Cargando equipos desde Google Sheets...
                       </div>
                     ) : teams.length === 0 ? (
                       <div className="px-4 py-3 text-center text-gray-500 text-sm">
                         <div className="font-semibold text-red-600 mb-2">No se pudieron cargar los equipos</div>
-                        <div className="text-xs">Verifica la conexión a Supabase</div>
+                        <div className="text-xs">Verifica la conexión con Google Sheets</div>
                         <button
                           onClick={() => loadTeams()}
                           className="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"

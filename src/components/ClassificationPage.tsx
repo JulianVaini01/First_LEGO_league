@@ -329,10 +329,10 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                         Pos
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Equipo
+                        Código
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
-                        Código
+                        Equipo
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
                         Mejor Puntuación
@@ -360,12 +360,12 @@ export default function ClassificationPage({ scores, onNavigate }: Classificatio
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-bold text-white text-lg">{team.team}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
                           <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                             {team.code}
                           </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-bold text-white text-lg">{team.team}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">

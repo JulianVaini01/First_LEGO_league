@@ -375,8 +375,13 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       getPrecisionTokenPoints(precisionTokens)
     );
 
-    if (coreValues !== null) {
-      await updateTeamCoreValues(teamId, coreValues);
+    console.log('Core Values antes de guardar:', coreValues);
+    if (coreValues !== null && coreValues !== undefined) {
+      console.log('Guardando Core Values:', coreValues, 'para team:', teamId);
+      const result = await updateTeamCoreValues(teamId, coreValues);
+      console.log('Resultado de guardar Core Values:', result);
+    } else {
+      console.log('Core Values es null o undefined, no se guardará');
     }
 
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbxjOP-nB_6MUKJjdpj7I7LDQv8cCYRPcI_dGY0IAO_q94eUREHyzYv0QzlraLln9_6hWQ/exec";
@@ -759,7 +764,10 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <button
-              onClick={() => setCoreValues(1)}
+              onClick={() => {
+                console.log('Seleccionando Core Value: 1');
+                setCoreValues(1);
+              }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 coreValues === 1
                   ? 'bg-red-100 border-red-500 shadow-lg'
@@ -772,7 +780,10 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               </div>
             </button>
             <button
-              onClick={() => setCoreValues(2)}
+              onClick={() => {
+                console.log('Seleccionando Core Value: 2');
+                setCoreValues(2);
+              }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 coreValues === 2
                   ? 'bg-yellow-100 border-yellow-500 shadow-lg'
@@ -785,7 +796,10 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               </div>
             </button>
             <button
-              onClick={() => setCoreValues(3)}
+              onClick={() => {
+                console.log('Seleccionando Core Value: 3');
+                setCoreValues(3);
+              }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 coreValues === 3
                   ? 'bg-green-100 border-green-500 shadow-lg'
@@ -798,7 +812,10 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
               </div>
             </button>
             <button
-              onClick={() => setCoreValues(4)}
+              onClick={() => {
+                console.log('Seleccionando Core Value: 4');
+                setCoreValues(4);
+              }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 coreValues === 4
                   ? 'bg-blue-100 border-blue-500 shadow-lg'

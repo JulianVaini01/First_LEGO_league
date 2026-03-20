@@ -379,7 +379,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       await updateTeamCoreValues(teamId, coreValues);
     }
 
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbyy96bo10sYRgVrNFHucSaujFVfWAz_6U1AHzsUcW_LT3GasdE-jT_StBsPR8STKNkPAA/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxjOP-nB_6MUKJjdpj7I7LDQv8cCYRPcI_dGY0IAO_q94eUREHyzYv0QzlraLln9_6hWQ/exec";
 
     const data = {
       codigo: selectedTeam.code,
@@ -389,10 +389,13 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       puntuacion: totalScore,
       equipmentInspection: equipmentInspectionPoints,
       inspeccion_equipamiento: equipmentInspectionPoints,
+      coreValues: coreValues || 0,
     };
 
+    console.log('Enviando datos a Google Sheets:', data);
+
     try {
-      await fetch(SHEET_URL, {
+      const response = await fetch(SHEET_URL, {
         method: "POST",
         mode: "no-cors",
         headers: {
@@ -400,8 +403,9 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         },
         body: JSON.stringify(data),
       });
+      console.log('Datos enviados exitosamente a Google Sheets');
     } catch (error) {
-      console.error("Error al enviar datos:", error);
+      console.error("Error al enviar datos a Google Sheets:", error);
     }
 
     alert('Puntuación guardada exitosamente');

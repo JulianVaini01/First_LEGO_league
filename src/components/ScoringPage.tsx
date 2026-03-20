@@ -379,7 +379,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       await updateTeamCoreValues(teamId, coreValues);
     }
 
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbxjOP-nB_6MUKJjdpj7I7LDQv8cCYRPcI_dGY0IAO_q94eUREHyzYv0QzlraLln9_6hWQ/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbyim5EjJ1W1RGcFVQHMzXCxuV72iJHXf4eFhwFRz2E2DxQss9MzBmC56WQ6_guJRdJBtQ/exec";
 
     const data = {
       codigo: selectedTeam.code,

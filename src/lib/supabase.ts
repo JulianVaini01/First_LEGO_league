@@ -69,8 +69,6 @@ export async function updateTeamCoreValues(
   teamId: string,
   coreValues: number
 ): Promise<Team | null> {
-  console.log('updateTeamCoreValues llamada con:', { teamId, coreValues });
-
   const { data, error } = await supabase
     .from('teams')
     .update({ core_values: coreValues })
@@ -83,6 +81,5 @@ export async function updateTeamCoreValues(
     return null;
   }
 
-  console.log('Core values actualizado exitosamente:', data);
   return data;
 }

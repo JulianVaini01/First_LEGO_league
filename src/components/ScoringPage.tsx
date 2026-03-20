@@ -134,7 +134,6 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [teamSearchInput, setTeamSearchInput] = useState('');
-  const [showTeamDropdown, setShowTeamDropdown] = useState(false);
   const [codeInput, setCodeInput] = useState('');
   const [codeError, setCodeError] = useState('');
   const [round, setRound] = useState(0);
@@ -490,109 +489,115 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
       </div>
 
       <div className="max-w-7xl mx-auto p-6 relative z-10">
-        {/* Team Info */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="grid md:grid-cols-4 gap-4">
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nombre del Equipo</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={teamSearchInput}
-                  onChange={(e) => {
-                    setTeamSearchInput(e.target.value);
-                    setShowTeamDropdown(true);
-                  }}
-                  onFocus={() => setShowTeamDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowTeamDropdown(false), 300)}
-                  className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    selectedTeam ? 'border-green-400 bg-green-50' : 'border-gray-300'
-                  }`}
-                  placeholder="Buscar equipo por nombre"
-                  disabled={loading}
-                />
-                {showTeamDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-                    {loading ? (
-                      <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                        Cargando equipos desde Google Sheets...
-                      </div>
-                    ) : teams.length === 0 ? (
-                      <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                        <div className="font-semibold text-red-600 mb-2">No se pudieron cargar los equipos</div>
-                        <div className="text-xs">Verifica la conexión con Google Sheets</div>
-                        <button
-                          onClick={() => loadTeams()}
-                          className="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                        >
-                          Reintentar
-                        </button>
-                      </div>
-                    ) : filteredTeams.length > 0 ? (
-                      filteredTeams.map(team => (
-                        <div
-                          key={team.id}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleSelectTeam(team);
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-blue-50 border-b last:border-b-0 cursor-pointer transition-colors"
-                        >
-                          <div className="font-semibold text-gray-800">{team.name}</div>
-                          <div className="text-xs text-gray-500">Código: {team.code}</div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                        No se encontraron equipos con "{teamSearchInput}"
-                      </div>
-                    )}
+        <div className="flex gap-6">
+          {/* Lista de Equipos - Lateral Izquierda */}
+          <div className="w-80 flex-shrink-0">
+            <div className="bg-white rounded-xl shadow-lg p-4 sticky top-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-3">Equipos Registrados</h3>
+              <input
+                type="text"
+                value={teamSearchInput}
+                onChange={(e) => setTeamSearchInput(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Buscar equipo..."
+              />
+              <div className="max-h-[calc(100vh-250px)] overflow-y-auto space-y-2">
+                {loading ? (
+                  <div className="text-center text-gray-500 py-4 text-sm">
+                    Cargando equipos...
+                  </div>
+                ) : teams.length === 0 ? (
+                  <div className="text-center text-gray-500 py-4 text-sm">
+                    <div className="font-semibold text-red-600 mb-2">No se pudieron cargar los equipos</div>
+                    <button
+                      onClick={() => loadTeams()}
+                      className="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : filteredTeams.length > 0 ? (
+                  filteredTeams.map(team => (
+                    <button
+                      key={team.id}
+                      onClick={() => handleSelectTeam(team)}
+                      className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                        selectedTeam?.id === team.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="font-semibold text-gray-800">{team.name}</div>
+                      <div className="text-xs text-gray-500">Código: {team.code}</div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-4 text-sm">
+                    No se encontraron equipos
                   </div>
                 )}
               </div>
-              {selectedTeam && <p className="text-xs text-green-600 mt-1">✓ Equipo seleccionado</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">código único del equipo</label>
-              <input
-                type="text"
-                value={codeInput}
-                onChange={(e) => handleCodeChange(e.target.value.toUpperCase())}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
-                  selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                }`}
-                placeholder="Digitar código"
-              />
-              {codeError && <p className="text-xs text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{codeError}</p>}
-              {selectedTeam && <p className="text-xs text-green-600 mt-1">✓ Código válido</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mesa</label>
-              <select
-                value={table}
-                onChange={(e) => setTable(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {Array.from({length: 6}, (_, i) => (
-                  <option key={i} value={`Mesa ${i + 1}`}>Mesa {i + 1}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Ronda</label>
-              <select
-                value={round}
-                onChange={(e) => setRound(Number(e.target.value))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value={0}>Ronda 0</option>
-                <option value={1}>Ronda 1</option>
-                <option value={2}>Ronda 2</option>
-                <option value={3}>Ronda 3</option>
-              </select>
             </div>
           </div>
+
+          {/* Formulario Principal */}
+          <div className="flex-1">
+            {/* Team Info */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre del Equipo</label>
+                  <input
+                    type="text"
+                    value={selectedTeam?.name || ''}
+                    readOnly
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                    placeholder="Selecciona un equipo"
+                  />
+                  {selectedTeam && <p className="text-xs text-green-600 mt-1">✓ Equipo seleccionado</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">código único del equipo</label>
+                  <input
+                    type="text"
+                    value={codeInput}
+                    onChange={(e) => handleCodeChange(e.target.value.toUpperCase())}
+                    className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase ${
+                      selectedTeam ? 'border-green-400 bg-green-50' : codeError ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                    }`}
+                    placeholder="Digitar código"
+                  />
+                  {codeError && <p className="text-xs text-red-600 mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{codeError}</p>}
+                  {selectedTeam && <p className="text-xs text-green-600 mt-1">✓ Código válido</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mesa</label>
+                  <select
+                    value={table}
+                    onChange={(e) => setTable(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {Array.from({length: 6}, (_, i) => (
+                      <option key={i} value={`Mesa ${i + 1}`}>Mesa {i + 1}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-1 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ronda</label>
+                  <select
+                    value={round}
+                    onChange={(e) => setRound(Number(e.target.value))}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value={0}>Ronda 0</option>
+                    <option value={1}>Ronda 1</option>
+                    <option value={2}>Ronda 2</option>
+                    <option value={3}>Ronda 3</option>
+                  </select>
+                </div>
+              </div>
         </div>
 
         {/* Restrictions */}
@@ -888,53 +893,55 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
           </div>
         </div>
 
-        {/* Current Scores Section */}
-        {selectedTeam && teamScores.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <Trophy className="h-6 w-6 text-blue-600 mr-2" />
-              Puntuaciones de {selectedTeam.name}
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ronda</th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Mesa</th>
-                    <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700">Puntos</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {teamScores.map((score, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 text-sm text-gray-700">Ronda {score.round}</td>
-                      <td className="px-4 py-2 text-sm text-gray-700">{score.table_name || 'N/A'}</td>
-                      <td className="px-4 py-2 text-right">
-                        <span className="text-lg font-bold text-blue-600">{score.score}</span>
-                      </td>
+          {/* Current Scores Section */}
+          {selectedTeam && teamScores.length > 0 && (
+            <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <Trophy className="h-6 w-6 text-blue-600 mr-2" />
+                Puntuaciones de {selectedTeam.name}
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ronda</th>
+                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Mesa</th>
+                      <th className="px-4 py-2 text-right text-sm font-semibold text-gray-700">Puntos</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {teamScores.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-700">Mejor Puntuación:</span>
-                  <span className="text-2xl font-bold text-green-600">
-                    {Math.max(...teamScores.map(s => s.score))}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-sm font-semibold text-gray-700">Promedio:</span>
-                  <span className="text-lg font-bold text-blue-600">
-                    {Math.round(teamScores.reduce((acc, s) => acc + s.score, 0) / teamScores.length)}
-                  </span>
-                </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {teamScores.map((score, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm text-gray-700">Ronda {score.round}</td>
+                        <td className="px-4 py-2 text-sm text-gray-700">{score.table_name || 'N/A'}</td>
+                        <td className="px-4 py-2 text-right">
+                          <span className="text-lg font-bold text-blue-600">{score.score}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </div>
-        )}
+              {teamScores.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-gray-700">Mejor Puntuación:</span>
+                    <span className="text-2xl font-bold text-green-600">
+                      {Math.max(...teamScores.map(s => s.score))}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm font-semibold text-gray-700">Promedio:</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      {Math.round(teamScores.reduce((acc, s) => acc + s.score, 0) / teamScores.length)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        </div>
       </div>
     </div>
   );

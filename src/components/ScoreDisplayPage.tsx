@@ -61,11 +61,15 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
             round1: undefined,
             round2: undefined,
             round3: undefined,
-            core_values: score.teams?.core_values || null,
+            core_values: null,
           });
         }
 
         const teamData = teamMap.get(teamId)!;
+
+        // Actualizar core_values siempre (tomar el más reciente de teams)
+        teamData.core_values = score.teams?.core_values || null;
+
         teamData.rounds.push({ round: score.round, score: score.score });
 
         // Guardar puntaje por ronda específica

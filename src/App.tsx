@@ -6,9 +6,8 @@ import ScoringPage from './components/ScoringPage';
 import RecordsPage from './components/RecordsPage';
 import ClassificationPage from './components/ClassificationPage';
 import ScoreDisplayPage from './components/ScoreDisplayPage';
-import GoogleScriptTestPage from './components/GoogleScriptTestPage';
 
-type Page = 'home' | 'scoring' | 'records' | 'classification' | 'display' | 'test';
+type Page = 'home' | 'scoring' | 'records' | 'classification' | 'display';
 
 export interface Score {
   id: string;
@@ -60,8 +59,6 @@ function App() {
         return <ClassificationPage scores={scores} onNavigate={setCurrentPage} />;
       case 'display':
         return <ScoreDisplayPage scores={scores} onNavigate={setCurrentPage} />;
-      case 'test':
-        return <GoogleScriptTestPage onNavigate={setCurrentPage} />;
       default:
         return <HomePage onNavigate={setCurrentPage} />;
     }

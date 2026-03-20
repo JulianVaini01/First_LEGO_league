@@ -1,8 +1,8 @@
 import React from 'react';
-import { Trophy, CheckCircle, BarChart3, Zap, Database } from 'lucide-react';
+import { Trophy, CheckCircle, BarChart3, Zap } from 'lucide-react';
 
 interface HomePageProps {
-  onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display' | 'test') => void;
+  onNavigate: (page: 'home' | 'scoring' | 'records' | 'classification' | 'display') => void;
 }
 
 export default function HomePage({ onNavigate }: HomePageProps) {
@@ -81,7 +81,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <button
               onClick={() => onNavigate('scoring')}
               className="group bg-gradient-to-r from-orange-500 to-pink-600 hover:from-red-600 hover:to-blue-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
@@ -131,19 +131,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <h3 className="text-xl font-bold text-center mb-2">Pantalla</h3>
               <p className="text-center text-blue-100 text-sm">
                 Mostrar puntuación actual
-              </p>
-            </button>
-
-            <button
-              onClick={() => onNavigate('test')}
-              className="group bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-cyan-600 hover:to-blue-700 p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl"
-            >
-              <div className="flex items-center justify-center mb-4">
-                <Database className="h-12 w-12 text-white group-hover:scale-110 transition-transform" />
-              </div>
-              <h3 className="text-xl font-bold text-center mb-2">API Test</h3>
-              <p className="text-center text-blue-100 text-sm">
-                Probar Google Script
               </p>
             </button>
           </div>

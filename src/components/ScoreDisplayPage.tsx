@@ -20,6 +20,7 @@ interface TeamScore {
   round1?: number;
   round2?: number;
   round3?: number;
+  core_values?: number | null;
 }
 
 export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPageProps) {
@@ -39,7 +40,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
   const loadTeamScores = async () => {
     const { data: allScores } = await supabase
       .from('team_scores')
-      .select('*, teams(name, code)')
+      .select('*, teams(name, code, core_values)')
       .order('score', { ascending: false });
 
     if (allScores) {
@@ -60,6 +61,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
             round1: undefined,
             round2: undefined,
             round3: undefined,
+            core_values: score.teams?.core_values || null,
           });
         }
 
@@ -197,6 +199,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
                     <th className="text-center py-4 px-3 text-amber-300 font-bold">Ronda 2</th>
                     <th className="text-center py-4 px-3 text-amber-300 font-bold">Ronda 3</th>
                     <th className="text-center py-4 px-3 text-amber-300 font-bold">Mejor Ronda</th>
+                    <th className="text-center py-4 px-3 text-amber-300 font-bold">Core Values</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -262,6 +265,15 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
                           <TrendingUp className="h-4 w-4 text-green-400 mr-1" />
                           <span className="text-green-400 font-bold text-xl">{team.best_score}</span>
                         </div>
+                      </td>
+                      <td className="py-4 px-3 text-center">
+                        {team.core_values !== null && team.core_values !== undefined ? (
+                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
+                            <span className="text-blue-400 font-bold text-lg">{team.core_values}</span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-600">-</span>
+                        )}
                       </td>
                     </tr>
                   ))}

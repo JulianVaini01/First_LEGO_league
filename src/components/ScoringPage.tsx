@@ -170,7 +170,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
   const loadTeams = async () => {
     setLoading(true);
     try {
-      const API_URL = "https://script.google.com/macros/s/AKfycbyO4Kn2nc2DxYGWqhjFZUP_ZADkUYPjrtZd7x3BVwAJ9Oznj8yk2Zibbnt5aFBwpsW03w/exec";
+      const API_URL = "https://script.google.com/macros/s/AKfycbwkCcjL8i9NIy4_Tvx-iysQD2H0aBvln_19hvUVgdyRUi_74oBW9QmeXBqcbbLMGYQ7tA/exec";
       console.log('Cargando equipos desde Google Sheets...');
 
       const response = await fetch(API_URL);
@@ -183,7 +183,7 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
           id: team.codigo || '',
           name: team.equipo || '',
           code: team.codigo || '',
-          core_values: null
+          core_values: team.coreValues || null
         }));
 
         setTeams(teamsFromAPI);

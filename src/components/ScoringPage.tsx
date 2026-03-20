@@ -180,9 +180,9 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
         console.log('Equipos cargados desde Google Sheets clasificación:', data.clasificacion);
 
         const teamsFromAPI = data.clasificacion.map((team: any) => ({
-          id: team.codigo || '',
-          name: team.equipo || '',
-          code: team.codigo || '',
+          id: String(team.codigo || ''),
+          name: String(team.equipo || ''),
+          code: String(team.codigo || ''),
           core_values: team.coreValues || null
         }));
 
@@ -225,8 +225,8 @@ export default function ScoringPage({ onNavigate, onAddScore }: ScoringPageProps
 
   const filteredTeams = teams.filter(t => {
     const searchTerm = teamSearchInput.toLowerCase();
-    const teamName = (t.name || '').toLowerCase();
-    const teamCode = (t.code || '').toLowerCase();
+    const teamName = String(t.name || '').toLowerCase();
+    const teamCode = String(t.code || '').toLowerCase();
     return teamName.includes(searchTerm) || teamCode.includes(searchTerm);
   });
 

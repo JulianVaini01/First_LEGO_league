@@ -95,7 +95,7 @@ export default function ScoreDisplayPage({ scores, onNavigate }: ScoreDisplayPag
         return team;
       });
 
-      teamsArray.sort((a, b) => b.total_score - a.total_score);
+      teamsArray.sort((a, b) => b.best_score - a.best_score);
 
       setTeamScores(teamsArray);
     }
